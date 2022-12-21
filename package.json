@@ -1,0 +1,42 @@
+{
+  "name": "{{TODO_REPO_NAME}}",
+  "version": "0.0.0",
+  "description": "{{TODO_DESCRIPTION}}",
+  "type": "module",
+  "module": "dist/index.js",
+  "unpkg": "dist/index.min.js",
+  "main": "dist/index.cjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "uvu src",
+    "build": "bundt src/index.js",
+    "lint": "eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saibotsivad/{{TODO_REPO_NAME}}.git"
+  },
+  "keywords": [
+    "{{TODO_KEYWORDS}}"
+  ],
+  "author": {
+    "name": "Tobias Davis",
+    "email": "tobias@davistobias.com",
+    "url": "https://davistobias.com"
+  },
+  "license": "SEE LICENSE IN LICENSE.md",
+  "bugs": {
+    "url": "https://github.com/saibotsivad/{{TODO_REPO_NAME}}/issues"
+  },
+  "homepage": "https://github.com/saibotsivad/{{TODO_REPO_NAME}}",
+  "devDependencies": {
+    "@saibotsivad/eslint-config-saibotsivad": "*"
+  }
+}
