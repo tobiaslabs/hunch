@@ -1,32 +1,6 @@
-# My `npm init` Folder
+# 👊 SLAMS
 
-```sh
-mkdir my-lib
-cd my-lib
-# then
-npx degit saibotsivad/init
-npm install --save-dev bundt uvu
-```
-
-***Before opening in WebStorm!!!***
-
-You must resolve the `TODO` inside [./.idea/modules.xml](.idea/modules.xml) ***and*** rename [./.idea/TODO_REPO_NAME.iml](.idea/TODO_REPO_NAME.iml) to the project name, or WebStorm will complain. Hard.
-
-Inside the folder, do a search for:
-
-```
-TODO_
-```
-
-And go rename the things.
-
-Finally, delete everything above these dashes:
-
----
-
-# {{TODO_REPO_NAME}}
-
-{{TODO_DESCRIPTION}}
+(S)tatic (Lam)bda (S)earch - Easily self host a static site search, using the power of AWS Lambda, [MiniSearch](https://lucaong.github.io/minisearch/), and [ItemsJS](https://github.com/itemsapi/itemsjs).
 
 ## Example
 
@@ -40,4 +14,4 @@ Describe api
 
 Published and released under the [Very Open License](http://veryopenlicense.com).
 
-If you need a commercial license, [contact me here](https://davistobias.com/license?software={{TODO_REPO_NAME}}).
+If you need a commercial license, [contact me here](https://davistobias.com/license?software=slams).

@@ -1,7 +1,7 @@
 {
-  "name": "{{TODO_REPO_NAME}}",
+  "name": "slams",
   "version": "0.0.0",
-  "description": "{{TODO_DESCRIPTION}}",
+  "description": "(S)tatic (Lam)bda (S)earch",
   "type": "module",
   "module": "dist/index.js",
   "unpkg": "dist/index.min.js",
@@ -16,15 +16,17 @@
   },
   "scripts": {
     "test": "uvu src",
-    "build": "bundt src/index.js",
+    "build": "rollup -c",
     "lint": "eslint"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/saibotsivad/{{TODO_REPO_NAME}}.git"
+    "url": "git+https://github.com/saibotsivad/slams.git"
   },
   "keywords": [
-    "{{TODO_KEYWORDS}}"
+    "search",
+    "11ty",
+    "lambda"
   ],
   "author": {
     "name": "Tobias Davis",
@@ -33,9 +35,9 @@
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "bugs": {
-    "url": "https://github.com/saibotsivad/{{TODO_REPO_NAME}}/issues"
+    "url": "https://github.com/saibotsivad/slams/issues"
   },
-  "homepage": "https://github.com/saibotsivad/{{TODO_REPO_NAME}}",
+  "homepage": "https://github.com/saibotsivad/slams",
   "devDependencies": {
     "@saibotsivad/eslint-config-saibotsivad": "*"
   }
