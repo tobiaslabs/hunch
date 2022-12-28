@@ -39,6 +39,13 @@
   },
   "homepage": "https://github.com/saibotsivad/slams",
   "devDependencies": {
-    "@saibotsivad/eslint-config-saibotsivad": "*"
+    "@saibotsivad/blockdown": "^3.0.0",
+    "@saibotsivad/eslint-config-saibotsivad": "*",
+    "itemsjs": "^2.1.20",
+    "js-yaml": "^4.1.0",
+    "minisearch": "^6.0.0",
+    "pointer-props": "^1.1.4",
+    "rollup": "^3.8.0",
+    "tiny-glob": "^0.2.9"
   }
 }
