@@ -22,9 +22,9 @@ Change categories are:
 ### Removed
 ### Security
 
-## [0.0.0](https://github.com/saibotsivad/slams/tree/v0.0.0) - 2022-12-21
+## [0.0.0](https://github.com/saibotsivad/searchmd/tree/v0.0.0) - 2022-12-21
 ### Added
 - (Not published to npm.) Created the base project from [saibotsivad/init](https://github.com/saibotsivad/init).
 
-[Unreleased]: https://github.com/saibotsivad/slams/compare/v0.0.0...HEAD
-[0.0.1]: https://github.com/saibotsivad/slams/compare/v0.0.0...v0.0.1
+[Unreleased]: https://github.com/saibotsivad/searchmd/compare/v0.0.0...HEAD
+[0.0.1]: https://github.com/saibotsivad/searchmd/compare/v0.0.0...v0.0.1

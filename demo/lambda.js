@@ -27,19 +27,21 @@ normalization and validation, or some massaging of the search
 results before you send them back.
 
 This simple implementation doesn't do any of that, it just takes
-the query parameters and hands them to Slams directly.
+the query parameters and hands them to SearchMD directly.
 
 */
 
 import { search } from './build/search.js'
-import { loadChunks } from './build/loader.js'
+import { loadAllFiles } from './build/loader.js'
+
+let s
 
 export const handler = async event => {
-	const { results } = await search(event.queryStringParameters)
-	const chunks = await loadChunks(results)
+	if (!s) s = search({ loadAllFiles })
+	const { results } = await s(event)
 	return {
 		statusCode: 200,
-		body: JSON.stringify({ results, chunks }),
+		body: JSON.stringify(results),
 		headers: { 'content-type': 'application/json' },
 	}
 }

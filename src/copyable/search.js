@@ -1,36 +1,10 @@
-import { dirname, join } from 'node:path'
-import { readFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
-
 import MiniSearch from 'minisearch'
 import ItemsJS from 'itemsjs'
 
-import aggregations from './index/aggregations.json' assert { type: 'json' }
-import filesList from './index/files-list.json' assert { type: 'json' }
+import configurations from './index/configurations.json' assert { type: 'json' }
+const { aggregations, searchableFields } = configurations
 import metadataToFiles from './index/metadata-to-files.json' assert { type: 'json' }
 import minisearchIndex from './index/minisearch.json' assert { type: 'json' }
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
-
-const loadAllFiles = async (contentFolder) => {
-	const promises = []
-	for (let i = 0; i < filesList.length; i++) {
-		promises.push(
-			readFile(join(contentFolder, `${i}.json`), 'utf8')
-				.then(string => JSON.parse(string))
-				.then(data => {
-					data._id = i
-					return data
-				}),
-		)
-	}
-	return Promise.all(promises)
-}
-
-let initializationMillis
-let items
-let mini
-let chunkIdToItemsJsId
 
 const BRACKETED_QUERY_PARAM = /([^[]+)\[([^\]]+)]/
 const castToPositiveInt = (params, key) => {
@@ -45,6 +19,21 @@ const castToBoolean = (params, key) => {
 const castToUniqueStrings = string => ([
 	...new Set(string.split(',').map(f => f.trim())),
 ])
+
+const generateItemsJsChunks = () => {
+	const chunks = []
+	let index = 0
+	for (const id in minisearchIndex.storedFields) {
+		const documentId = minisearchIndex.documentIds[id]
+		const { _content, ...metadata } = minisearchIndex.storedFields[id]
+		chunks.push({
+			...metadata,
+			_id: documentId,
+			_content,
+		})
+	}
+	return chunks
+}
 
 /**
  * @typedef {Object} QueryParameters
@@ -113,7 +102,7 @@ const normalizeAndValidateQueryStringParameters = params => {
 	return parsed
 }
 
-const exitEarlyForEmptySet = params => {
+const exitEarlyForEmptySet = (params) => {
 	if (params.boost)
 		for (const key in params.boost)
 			if (!metadataToFiles[key]) return true
@@ -149,42 +138,42 @@ const filterDocuments = params => {
 	}
 }
 
+let initializationMillis
+let items
+let mini
+let chunkIdToItemsJsId
+let itemsJsIdToChunkId
+
 export const search = async ({ queryStringParameters, normalizedParameters }) => {
 	if (!normalizedParameters) normalizedParameters = normalizeAndValidateQueryStringParameters(queryStringParameters || {})
 
 	// If for example you specify `facet[tags]=cats` and there are no documents
 	// containing that tag, we can just short circuit and exit early.
-	if (exitEarlyForEmptySet(normalizedParameters)) return {
-		results: [],
-		search_results: [],
-	}
+	if (exitEarlyForEmptySet(normalizedParameters)) return { results: [], normalizedParameters }
 
 	if (!initializationMillis) {
 		const start = Date.now()
-		const data = await loadAllFiles(join(__dirname, 'file'))
 		console.log('Initializing ItemsJS.')
+		const chunks = generateItemsJsChunks()
 		chunkIdToItemsJsId = {}
-		const chunks = []
-		for (const { metadata, blocks } of data) {
-			for (const { _id, content } of blocks) {
-				chunkIdToItemsJsId[_id] = chunks.length
-				chunks.push({
-					...metadata,
-					__id: _id,
-					_content: content,
-				})
-			}
-		}
+		itemsJsIdToChunkId = {}
+		chunks.forEach((chunk, index) => {
+			chunkIdToItemsJsId[chunk._id] = index + 1
+			itemsJsIdToChunkId[index + 1] = chunk._id
+		})
 		items = ItemsJS(chunks, {
 			native_search_enabled: false,
 			custom_id_field: '_id',
-			// aggregations,
-			// searchableFields,
+			aggregations,
 		})
 		console.log('Initializing MiniSearch.')
 		const fields = [
-			...Object.keys(aggregations),
-			'_content',
+			...new Set([
+				...(searchableFields || []),
+				...Object.keys(aggregations || {}),
+				'_file',
+				'_content',
+			]),
 		]
 		mini = MiniSearch.loadJS(minisearchIndex, {
 			idField: '_id',
@@ -202,28 +191,32 @@ export const search = async ({ queryStringParameters, normalizedParameters }) =>
 
 	for (const key of MINISEARCH_KEYS_TO_COPY)
 		if (normalizedParameters[key]) miniOptions[key] = normalizedParameters[key]
-	const searchResults = mini.search(normalizedParameters.q, miniOptions)
+	let searchResults = mini.search(normalizedParameters.q, miniOptions)
+	const originalSearchResultsCount = searchResults.length
 
-	console.log(`MiniSearch produced ${searchResults.length} search results.`)
+	const documentIdToScore = {}
+	for (const result of searchResults) {
+		const id = result.id.split(':')[0]
+		if (!documentIdToScore[id] || documentIdToScore[id].score < result.score) documentIdToScore[id] = result
+	}
+	searchResults = Object.values(documentIdToScore)
 
-	const itemsOptions = {
+	console.log(`MiniSearch found search results in ${searchResults.length} documents (across ${originalSearchResultsCount} chunks).`)
+
+	const results = items.search({
 		per_page: 1,
 		custom_id_field: '_id',
 		ids: searchResults.map(s => chunkIdToItemsJsId[s.id]),
-		// filter: item => {
-		// 	console.log('-----------item')
-		// 	return true
-		// },
-	}
-	const results = items.search(itemsOptions)
-	results.data.items = (results.data.items || []).filter(Boolean).map(item => {
-		item._id = item.__id
-		delete item.__id
+	})
+	results.data.items = (results.data.items || []).map(item => {
+		// TODO figure out the id here
+		// item._id = item.__id
+		// delete item.__id
 		return item
 	})
 	return {
 		results,
 		initializationMillis,
-		normalizedParameters,
+		params: normalizedParameters,
 	}
 }

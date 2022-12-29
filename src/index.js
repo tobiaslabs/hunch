@@ -1,9 +1,19 @@
 import { sep, join, dirname, isAbsolute, resolve } from 'node:path'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, writeFile, copyFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 import glob from 'tiny-glob'
 import MiniSearch from 'minisearch'
 
 import { parseFile } from './generate/parse-file.js'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+const RESERVED_METADATA_KEYS = [
+	'id',
+	'_id',
+	'_content',
+	'_file',
+]
 
 const defaultOptions = {
 	glob: '**/*.md',
@@ -20,9 +30,12 @@ const getOptionsAndSetupFolders = async (options) => {
 		contentFolder,
 		glob: globString,
 		indent,
+		searchableFields,
 		stopWords,
 		...remaining
 	} = Object.assign({}, defaultOptions, options)
+
+	if (!searchableFields?.length) searchableFields = []
 
 	if (stopWords && !Array.isArray(stopWords)) throw new Error('The option "stopWords" must be an array!')
 	else stopWords = [ ...new Set(stopWords) ]
@@ -40,6 +53,7 @@ const getOptionsAndSetupFolders = async (options) => {
 		fileDirectory,
 		indexDirectory,
 		globString,
+		searchableFields,
 		stopWords,
 		writeJson: async (filepath, obj) => writeFile(filepath, JSON.stringify(obj, undefined, indent), 'utf8'),
 		...remaining,
@@ -53,10 +67,11 @@ const humanTime = millis => {
 	else return `${Math.round(millis / 6000) / 10} minutes` // 4_567_890 => '76.1 minutes'
 }
 
-export const slams = async options => {
+export const searchmd = async options => {
 	const start = Date.now()
 	let {
 		aggregations,
+		buildFolder,
 		contentFolder,
 		fileDirectory,
 		globString,
@@ -66,14 +81,16 @@ export const slams = async options => {
 		normalizeMetadata,
 		preFilter,
 		processedFilter,
+		searchableFields,
 		stopWords, // TODO
 		writeJson,
 		verbose,
 	} = await getOptionsAndSetupFolders(options)
 
-	if (metadataKeysToIndex.includes('id') || metadataKeysToIndex.includes('_id') || metadataKeysToIndex.includes('_content')) throw new Error('Cannot index reserved metadata property names: id, _id, _content')
+	if (RESERVED_METADATA_KEYS.find(key => metadataKeysToIndex.includes(key))) throw new Error('Cannot index reserved metadata property names: ' + RESERVED_METADATA_KEYS.join(', '))
 
-	await writeJson(join(indexDirectory, 'aggregations.json'), aggregations)
+	await copyFile(join(__dirname, 'copyable', 'search.js'), join(buildFolder, 'search.js'))
+	await writeJson(join(indexDirectory, 'configurations.json'), { aggregations, searchableFields })
 
 	console.log('Parsing all content files...')
 	const files = await glob(globString, { cwd: contentFolder })
@@ -141,7 +158,7 @@ export const slams = async options => {
 		for (const { _id: chunkId, content } of blocks) {
 			chunks.push({
 				...metadata,
-				file,
+				_file: file,
 				_id: chunkId,
 				_content: content,
 			})
@@ -152,8 +169,10 @@ export const slams = async options => {
 
 	const fields = [
 		...new Set([
+			...(searchableFields || []),
 			...Object.keys(aggregations || {}),
 			'_content',
+			'_file',
 		]),
 	].sort()
 	if (verbose) {
@@ -164,15 +183,10 @@ export const slams = async options => {
 		...(minisearchOptions || {}),
 		fields,
 		idField: '_id',
-		// We only store the fields that are searchable, because on the actual
-		// search side we do a file lookup and that has all the metadata already.
-		// This helps keep the search index small, with the tradeoff that we use
-		// disk I/O to load that metadata. This could become a configurable option.
-		// TODO do we even need to specify this if its the same?
 		storeFields: fields,
 	})
 	miniSearch.addAll(chunks)
 	await writeJson(join(indexDirectory, 'minisearch.json'), miniSearch)
 
-	console.log(`Slams completed in ${humanTime(Date.now() - start)}.`)
+	console.log(`SearchMD completed in ${humanTime(Date.now() - start)}.`)
 }

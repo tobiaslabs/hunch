@@ -1,7 +1,7 @@
 {
-  "name": "slams",
+  "name": "searchmd",
   "version": "0.0.0",
-  "description": "(S)tatic (Lam)bda (S)earch",
+  "description": "Add powerful search to your Markdown content, using the power of AWS Lambda.",
   "type": "module",
   "module": "dist/index.js",
   "unpkg": "dist/index.min.js",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/saibotsivad/slams.git"
+    "url": "git+https://github.com/saibotsivad/searchmd.git"
   },
   "keywords": [
     "search",
@@ -35,9 +35,9 @@
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "bugs": {
-    "url": "https://github.com/saibotsivad/slams/issues"
+    "url": "https://github.com/saibotsivad/searchmd/issues"
   },
-  "homepage": "https://github.com/saibotsivad/slams",
+  "homepage": "https://github.com/saibotsivad/searchmd",
   "devDependencies": {
     "@saibotsivad/blockdown": "^3.0.0",
     "@saibotsivad/eslint-config-saibotsivad": "*",
