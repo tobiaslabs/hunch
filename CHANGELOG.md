@@ -22,7 +22,7 @@ Change categories are:
 ### Removed
 ### Security
 
-## [0.0.0](https://github.com/saibotsivad/searchmd/tree/v0.0.0) - 2022-12-21
+## [0.0.0-alpha.1](https://github.com/saibotsivad/searchmd/tree/v0.0.0-alpha.1) - 2022-12-21
 ### Added
 - (Not published to npm.) Created the base project from [saibotsivad/init](https://github.com/saibotsivad/init).
 
