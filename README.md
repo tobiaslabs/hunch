@@ -1,6 +1,10 @@
-# 👊 SearchMD
+# 🔎🩺 SearchMD
 
-Add powerful search to your Markdown content, using the power of AWS Lambda. (Or Cloudflare Worker if your data set is small enough.)
+Add powerful search to your Markdown content, using the power of AWS Lambda.
+
+> **NOTE:** This is a work in progress. I'm using it elsewhere in production, but still in the process of extracting it from that architecture.
+
+*(You can also add search in the browser, or in Cloudflare Worker, if your data set is small enough.)*
 
 SearchMD supports these search features:
 

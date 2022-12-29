@@ -1,6 +1,8 @@
 import MiniSearch from 'minisearch'
 import ItemsJS from 'itemsjs'
 
+// TODO these could really get combined into one JSON file
+// TODO and at that point you could really just call `search({ query, data })` or whatever
 import configurations from './index/configurations.json' assert { type: 'json' }
 const { aggregations, searchableFields } = configurations
 import metadataToFiles from './index/metadata-to-files.json' assert { type: 'json' }

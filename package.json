@@ -1,6 +1,6 @@
 {
   "name": "searchmd",
-  "version": "0.0.0",
+  "version": "0.0.0-alpha.1",
   "description": "Add powerful search to your Markdown content, using the power of AWS Lambda.",
   "type": "module",
   "module": "dist/index.js",
