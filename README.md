@@ -1,12 +1,10 @@
-# 🔎🩺 SearchMD
+# 🔎 Hunch
 
-Add powerful search to your Markdown content, using the power of AWS Lambda.
+Compiled search for your static Markdown files.
 
-> **NOTE:** This is a work in progress. I'm using it elsewhere in production, but still in the process of extracting it from that architecture.
+*(Does not rely on disk access, so you can also use it in the browser or in Cloudflare Worker, if your data set is small enough.)*
 
-*(You can also add search in the browser, or in Cloudflare Worker, if your data set is small enough.)*
-
-SearchMD supports these search features:
+Hunch supports these search features:
 
 - Full text lookup
   - To find records with `exact words` use `q=exact words`
@@ -28,7 +26,7 @@ SearchMD supports these search features:
 - Pagination
   - Specify how many results with `page[size]` and a pagination offset with `page[number]`
 - Stop-Words
-  - Since this is highly language dependent, these are not built in. You'll need to specify them in your SearchMD configuration e.g. `stopWords: [ 'and', 'or' ]`
+  - Since this is highly language dependent, these are not built in. You'll need to specify them in your Hunch configuration e.g. `stopWords: [ 'and', 'or' ]`
 - Sort by metadata properties
   - Return paginated results sorted by metadata instead of search score, using `sort=tag,series` a comma-seperated list of fields
 - List counts for aggregated data
@@ -41,43 +39,178 @@ Coming soon?
 Also:
 - Indexes are built into the bundled JS file, but the whole file content is not. A file-system loader will be written and you can use that, but if you don't want to than set `useFileLoader: false` and pass in your own.
 
-## Example
+## Usage
 
-Suppose you have a normal static website, with markdown files that look like this:
+Install the usual ways:
+
+```bash
+npm install hunch
+```
+
+Use it as a CLI tool:
+
+```bash
+hunch
+# shorthand for
+hunch --config hunch.config.js
+```
+
+Or use it in code:
+
+```js
+import { generate } from 'hunch'
+await generate({
+	input: './site',
+	output: './dist/hunch.json',
+	// other options
+})
+```
+
+## Overview
+
+Many modern websites are backed by static Markdown files with some YAML-like metadata at the top, e.g. this file `2022-12-29/cats-and-dogs.md`:
 
 ```md
 ---
-title: My Cool Post
+title: About Cats & Dogs
 tags: cats, dogs
+series: Animals
 ---
 
 Fancy words about cats and dogs.
 ```
 
-SearchMD will generate a JavaScript file with an export that uses a search index that's pre-compiled for the fastest cold-start time possible:
+As part of your deployment step, you would use Hunch to generate a pre-computed search index as a JSON file:
+
+```bash
+hunch --config hunch.config.js
+```
+
+A simple configuration file would specify the folder containing Markdown files, the output filepath to write the JSON file, and some metadata details:
 
 ```js
-import { search } from './build/path/search.js'
-// A normal Lambda event handler from an AWS API Gateway:
+// hunch.config.js
+export default {
+	// Define the folder to scan.
+	input: './site',
+	// Define where to write the index file.
+	output: './dist/hunch.json',
+	// Property names of metadata to treat as "collections", like "tags" or "authors".
+	aggregations: {
+		series: {
+			// Define some properties about the aggregations.
+			title: 'Series',
+		},
+		tags: {
+			title: 'Tags',
+			// If multiple values are possible per document, you need to specify
+			// how Hunch will treat them. (See documentation for more details.)
+			conjunction: false,
+		}
+	},
+	// All the aggregation fields will be searchable, but you need to specify
+	// fields that should be searchable that aren't aggregations.
+	searchableFields: [
+		'title',
+		'introduction',
+	],
+}
+```
+
+With this configuration, running Hunch generates a JSON file containing the pre-computed and optimized search index.
+
+To make a search using this index, you would create a Hunch instance with the index, and then query it:
+
+```js
+// Load the generated JSON file in one way or another:
+import { readFile } from 'node:fs/promises'
+const data = JSON.parse(await readFile('./dist/hunch.json'))
+
+// Create an instance of SearchMd using that data:
+import { hunch } from 'hunch'
+const search = hunch({ data })
+
+// Then query it:
+const results = search({
+	q: 'fancy words',
+	facetInclude: [ 'cats' ],
+	facetExclude: [ 'rabbits' ],
+})
+/*
+results = {
+	items: [
+		{
+			title: 'About Cats & Dogs',
+			tags: [ 'cats', 'dogs' ],
+			series: 'Animals',
+			_id: '2022-12-29/cats-and-dogs.md',
+			_content: 'Fancy words about cats and dogs.',
+		}
+	],
+	page: {
+		number: 0,
+		size: 1,
+		total: 1,
+	},
+	aggregations: {
+		series: {
+			title: 'Series',
+			buckets: [
+				{
+					key: 'Animals',
+					count: 1,
+				},
+			],
+		},
+		tags: {
+			title: 'Tags',
+			buckets: [
+				{
+					key: 'cats',
+					count: 1,
+				},
+				{
+					key: 'dogs',
+					count: 1,
+				},
+				{
+					key: 'rabbits',
+					count: 0,
+				},
+			],
+		}
+	}
+}
+*/
+```
+
+If you are using Hunch as an API with a URL query parameter interface, such as AWS Lambda, Cloudflare Worker, or even the browser, you can easily transform those query parameters into a normalized SearchMD query object.
+
+For example, here is a complete AWS Lambda implementation (assuming the event trigger is an AWS API Gateway):
+
+```js
+// If you package the generated JSON file into the Lambda bundle, you can
+// simply read it from disk:
+import { readFile } from 'node:fs/promises'
+const data = JSON.parse(await readFile('./dist/hunch.json'))
+
+// Import the normal `hunch` but also the helper `normalize` function:
+import { hunch, normalize } from 'hunch'
+
+// Create a Hunch instance like normal:
+const search = hunch({ data })
+
+// This is a normal Lambda function, handling an event from an AWS API Gateway:
 export const handler = async event => {
-	// Here you would do query parameter normalization, authentication, or
-	// anything else, and then perform your search:
-	const { results } = await search(event.queryStringParameters)
-	// results = [
-	// 	{
-	// 		id: 'filepath of document',
-	// 		metadata: {
-	// 			title: 'My Cool Post',
-	// 			tags: [ 'cats', 'dogs' ],
-	// 		},
-	// 		blocks: [
-	// 			{
-	// 				content: '\nFancy words about cats and dogs.'
-	// 			}
-	// 		]
-	// 	},
-	// 	// etc.
-	// ]
+	/*
+	For example:
+	queryStringParameters = {
+		q: 'fancy words',
+		'facet[tags]': 'cats,-rabbits',
+	}
+	 */
+	const query = normalize(event.queryStringParameters)
+	const results = search(query)
 	return {
 		statusCode: 200,
 		body: JSON.stringify(results),
@@ -86,82 +219,229 @@ export const handler = async event => {
 }
 ```
 
-## Overview
+Hunch only generates the search index and handles queries of that index, it does not have an opinion about how or where to deploy the functionality.
 
-SearchMD generates indexes from a folder of content files, bundling that into a single JavaScript file that you would call to do your search later.
+## Features
 
-Deploying that bundle out to AWS is left up to you, but if you want a really simple API Gateway + Lambda integration, have a look at the cheat-sheet below for an example that uses [serverless](https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy-function) to deploy it.
+This is a list of all the features that Hunch supports out of the box.
 
-When a query comes to the Lambda, it uses the pre-computed search index to perform the search, returning the results.
+#### Full Text Lookup
 
-Cold start times (the first execution instance) should be pretty fast, even for modest sized content (300-400 documents), and of course warmed execution times are even faster.
+Find records with exact words.
 
-## Build Configuration
+- **Query Parameter:** `q`
+- **Programmatic:** `q`
+- **Type:** `String`
+- **Example:** `{ q: 'exact words' }`
 
-SearchMD looks for a file `searchmd.config.js` by default, but pass in `-c` or `--config` to specify a different file.
+#### Fuzzy Search
 
-## Processing
+Specify a fuzziness to the text query to find records with misspelled or similar words.
+To find `cats` and `kats` you might use `q=cats&fuzzy=0.8`
 
-SearchMD will work without pre-processing if you use YAML-flavored frontmatter and plain Markdown. For different content (e.g. GitHub flavored, MultiMarkdown, etc.) you may be able to configure SearchMD will need to pre-process it. If you use anything more exotic or esoteric, you may need to convert it into a SearchMD-usable file tree as your own pre-processing step before running SearchMD.
+- **Query Parameter:** `fuzzy`
+- **Programmatic:** `fuzzy`
+- **Type:** `Float` (Must be a positive value, greater than `0`)
+- **Example:** `{ q: 'cats', fuzzy: '0.8' }` would find `cats` and `kats`.
 
-### Filtering Files
+#### Specific Fields
 
-By default, SearchMD will look in the folder you point it at, and attempt to ingest all files ending in `.md` (aka Markdown).
+Limit the text query to one or more metadata properties.
 
-You can configure that one of two ways:
+- **Query Parameter:** `fields`
+  - **Type:** `String` (Comma separated values.)
+  - **Example:** `{ q: 'cats', fields: 'title,summary' }` would only look in `title` and `summary`.
+- **Programmatic:** `fields`
+  - **Type:** `Array<String>`
+  - **Example:** `{ q: 'cats', fields: [ 'title', 'summary' ] }` would only look in `title` and `summary`.
 
-**1: File Glob Parameters**
+#### Prefix search
 
-SearchMD uses [tiny-glob](https://www.npmjs.com/package/tiny-glob) with a default parameter of `**/*.md` which you can override:
+To find both `motorcycle` and `motocross` you might use `moto` as the query text, and specify it as a prefix.
+
+- **Query Parameter:** `prefix`
+  - **Type:** `String` (Must be exactly `true` or `false`.)
+  - **Example:** `{ q: 'cats', prefix: 'true' }`.
+- **Programmatic:** `prefix`
+  - **Type:** `Boolean` (Anything truthy will be interpreted as `true`, all other values as `false`.)
+  - **Example:** `{ q: 'cats', prefix: true }`
+
+#### Suggestions
+
+Suggest other search options from the indexed data, e.g. for the query text `arch` suggest `archery sport` or `march madness`.
+
+- **Query Parameter:** `suggest`
+  - **Type:** `String` (Must be exactly `true` or `false`.)
+  - **Example:** `{ q: 'cats', suggest: 'true' }`.
+- **Programmatic:** `suggest`
+  - **Type:** `Boolean` (Anything truthy will be interpreted as `true`, all other values as `false`.)
+  - **Example:** `{ q: 'cats', suggest: true }`
+
+Note: this does change the results output!
+
+<!--
+TODO need to document and test this better
+-->
+
+
+
+
+
+
+
+
+
+
+
+
+#### Boosting metadata properties
+
+In configuration set `minisearchOptions.boost` to an object like `{ title: 2 }`
+
+  - Per-request set `boost[title]=2`
+#### Ranking
+
+The search results include a ranking value called `score`, for you to sort with
+
+#### Facets
+
+Filter by content metadata, e.g. for content with a `tag` metadata containing `cats` or `dogs` use `facet[tag]=cats,dogs` a comma-seperated list, prefix with `-` to
+exclude, e.g. `facet[tag]=cats,-dogs`
+#### Pagination
+
+Specify how many results with `page[size]` and a pagination offset with `page[number]`
+
+#### Stop-Words
+
+Since this is highly language dependent, these are not built in. You'll need to specify them in your Hunch configuration e.g. `stopWords: [ 'and', 'or' ]`
+
+#### Sort by metadata properties
+
+Return paginated results sorted by metadata instead of search score, using `sort=tag,series` a comma-seperated list of fields
+
+#### List counts for aggregated data
+
+Simply don't set a `q` on your query parameter.
+
+  - If you've set up `tag` as an aggregation, return an object containing `tag` as a key, with a document count for each `tag` value.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Configuration
+
+When run from the command line, Hunch looks for a file `hunch.config.js` by default, but pass in `-c` or `--config` to specify a different file.
+
+The available configuration properties are:
+
+#### `aggregations`
+
+This property is responsible for generating search facets, it is a dictionary of keys to objects containing these properties:
+
+- `title` - The human-readable name.
+- `size` - The number of items to return for this aggregation. (Default: 10)
+- `conjunction` - By default, a search with multiple inclusive facets specified will create an `AND` query. By setting this value to `false`, it becomes an `OR` query. You'll probably want to set it to `false` for things like tags/categories.
+
+Note that `aggregations` is passed in to ItemsJS without modification, so you can read [the ItemsJS docs](https://github.com/itemsapi/itemsjs#api) for additional details.
+
+#### `glob`
+
+This is the search string used to ingest files from the input folder.
+
+Default: `**/*.md`
+
+#### `input`
+
+The input directory to scan for files to ingest.
+
+#### `normalizeMetadata`
+
+An optional function which is called during ingestion prior to filtering. It is given the document metadata object, and should return the modified object.
+
+Example:
 
 ```js
-// searchmd.config.js
+// hunch.config.js
 export default {
-	// To support `.txt` files as well:
-	glob: '**/*.{md,txt}',
-}
-```
-
-**2: Pre-Process File Filter**
-
-You can provide a function to tell SearchMD whether to index a file or not, based on its filename:
-
-```js
-// searchmd.config.js
-export default {
-	// Given the relative filename and path, e.g. `folder1/folder2/file.md`
-	preFilter: file => {
-		// Return truthy to index the file, falsey to exclude.
-		return !file.startsWith('draft/')
-	},
-}
-```
-
-**3: Processed File Filter**
-
-You can provide a function to tell SearchMD whether to index a file or not, based on the processed file:
-
-```js
-// searchmd.config.js
-export default {
-	processedFilter: ({
-		file,
-		metadata,
-		blocks,
-	}) => {
-		return !file.startsWith('draft/') && metadata.published?.getTime() > Date.now()
+	// ... other options, then ...
+	normalizeMetadata: metadata => {
+		if (typeof metadata.tags === 'string') metadata.tags = metadata.tags.split(';')
+		return metadata
 	}
 }
 ```
 
+#### `output`
+
+The filepath of where to write the JSON file, e.g. `./dist/hunch.json`
+
+#### `preFilter`
+
+An optional function to filter out files by filename, before they are read. Return truthy to include the file, or falsey to exclude.
+
+Example:
+
+```js
+// hunch.config.js
+export default {
+	// ... other options, then ...
+	preFilter: filepath => !filepath.startsWith('draft/')
+}
+```
+
+#### `processedFilter`
+
+An optional function to filter out files after they are fully read and processed. Return truthy to include the file, or falsey to exclude. (Occurs *after* the `normalizeMetadata` function executes.)
+
+Default: excludes documents where `published` is exactly `false` or is a date that is in the future.
+
+Example:
+
+```js
+// hunch.config.js
+export default {
+	// ... other options, then ...
+	processedFilter: ({ metadata }) => metadata.draft !== true
+}
+```
+
+#### `searchableFields`
+
+A list of field names that should be searchable, that are not an aggregate facet.
+
+This list will *always* include the field names from `aggregations`, as well as `_content`.
+
+## Content Processing
+
+Hunch will work without pre-processing if you use YAML-flavored frontmatter and plain Markdown. For different content (e.g. GitHub flavored, MultiMarkdown, etc.) you may be able to configure SearchMD will need to pre-process it. If you use anything more exotic or esoteric, you may need to convert it into a SearchMD-usable file tree as your own pre-processing step before running SearchMD.
+
+The steps of processing are as follows:
+
+1. Filepaths are grabbed using the `glob` property.
+2. If provided, those files are filtered using the `preFilter` function.
+3. The files are read from disk and the frontmatter is parsed as YAML to become a metadata object.
+4. If provided, each metadata object is passed through the `normalizeMetadata` function.
+5. If provided, the parsed file objects are further filtered using the `processedFilter` function.
+
 ## Pre-Processing
 
-Under the covers, SearchMD makes use of [UnifiedJS](https://unifiedjs.com/) to process the content files into an AST (Abstract State Tree) to be able to generate a search index construction. This means you can configure SearchMD' pre-processing using plugins/extensions in the [syntax-tree](https://github.com/syntax-tree/mdast-util-gfm) ecosystem.
+Under the covers, Hunch makes use of [UnifiedJS](https://unifiedjs.com/) to process the content files into an AST (Abstract State Tree) to be able to generate a search index construction. This means you can configure SearchMD' pre-processing using plugins/extensions in the [syntax-tree](https://github.com/syntax-tree/mdast-util-gfm) ecosystem.
 
 For example, adding support for GitHub flavored Markdown is as easy as:
 
 ```js
-// searchmd.config.js
+// hunch.config.js
 import { gfm } from 'micromark-extension-gfm'
 import { gfmFromMarkdown } from 'mdast-util-gfm'
 export default {
@@ -174,23 +454,9 @@ export default {
 }
 ```
 
-## Metadata Normalization
-
-You can pass in a function to normalize metadata, for example if your `tags` metadata is a mix of strings and arrays:
-
-```js
-// searchmd.config.js
-export default {
-	normalizeMetadata: metadata => {
-		if (typeof metadata.tags === 'string') metadata.tags = metadata.tags.split(/,\s*/)
-		return metadata
-	},
-}
-```
-
 ## Post-Processing
 
-SearchMD internally converts content files to plaintext (without any markup) broken down into smaller chunks. These chunks are used for the initial text lookups, and the results are then used to match to chunks from the original content file. These content chunks are what is passed back from SearchMD.
+Hunch internally converts content files to plaintext (without any markup) broken down into smaller chunks. These chunks are used for the initial text lookups, and the results are then used to match to chunks from the original content file. These content chunks are what is passed back from SearchMD.
 
 For example, given a markdown section like this:
 
@@ -198,60 +464,9 @@ For example, given a markdown section like this:
 My *dogs* are barking.
 ```
 
-SearchMD will convert that to `my dogs are barking` so that a search for `"dogs are barking"` will rank correctly, but the search result will be the original `My *dogs* are barking.`
+Hunch will convert that to `my dogs are barking` so that a search for `"dogs are barking"` will rank correctly, but the search result will be the original `My *dogs* are barking.`
 
-The final content chunks aren't used by SearchMD internally, but they
-
-
-
-
-
-
-
-
-```js
-import { search } from './build/search.js'
-import { loadChunksFs } from 'searchmd/load-chunks-fs'
-export const handler = async event => {
-	const { results } = await search(event.queryStringParameters)
-	// results = [
-	// 	{
-	// 		id: 'filepath of document',
-	// 		metadata: {
-	// 			title: 'My Cool Post',
-	// 			tags: [ 'cats', 'dogs' ],
-	// 		},
-	// 		chunks: [
-	// 			'id1',
-	// 			// etc.
-	// 		],
-	// 	},
-	// 	// etc.
-	// ]
-	const chunks = await loadChunksFs(results)
-	// chunks = {
-	// 	id1: {
-	// 		content: '\nFancy words about cats and dogs.'
-	// 	}
-	// }
-	return {
-		statusCode: 200,
-		body: JSON.stringify({ results, chunks }),
-		headers: { 'content-type': 'application/json' },
-	}
-}
-```
-
-
-
-
-
-
-
-
-
-
-
+The final content chunks aren't used by Hunch internally, but they
 
 TODO:
 what about e.g. a search for `word1 word2` where the markdown is `word1 *word2*` or `word1 <span>word2</span>`
@@ -262,17 +477,17 @@ could go simple for now, e.g. flatten everything for indexing, then return the r
 
 
 
-SearchMD supports basic Markdown with YAML-flavored Frontmatter out of the box, but you'll need to configure pre-processing if you are using something more complex like GitHub-flavored Markdown, or templates, or similar.
-
-One solution for more complex content files would be to generate plain Markdown files as part of your build/deploy pipeline, into some temporary folder, and then point SearchMD to that.
 
 
-## Reserved Metadata Properties
 
-TODO: I can't figure out how to remap `id` to e.g. `_id` so you can't have an `id` frontmatter property.
+## Additional Notes
+
+Behind the scenes this libary uses [ItemsJS](https://github.com/itemsapi/itemsjs) and [MiniSearch](https://github.com/lucaong/minisearch). In general they are pretty excellent, but one thing I can't figure out is how to remap `id` to e.g. `_id` consistently, so until that's sorted out the following metadata properties are internal-use only (if you try to specify them Hunch will throw an error): `id`, `_id`, `_content` and `_file`.
+
+The output JSON file is an amalgamation of a MiniSearch index and other settings, optimized to save space. There is **no guarantee** as to the output structure or contents between Hunch versions: you **must** compile with the same version that you search with!
 
 ## License
 
 Published and released under the [Very Open License](http://veryopenlicense.com).
 
-If you need a commercial license, [contact me here](https://davistobias.com/license?software=searchmd).
+If you need a commercial license, [contact me here](https://davistobias.com/license?software=hunch).

@@ -1,12 +1,9 @@
-import { sep, join, dirname, isAbsolute, resolve } from 'node:path'
-import { mkdir, writeFile, copyFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
+import { join, dirname, isAbsolute, resolve } from 'node:path'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import glob from 'tiny-glob'
 import MiniSearch from 'minisearch'
-
-import { parseFile } from './generate/parse-file.js'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
+import { parse } from '@saibotsivad/blockdown'
+import { load, JSON_SCHEMA } from 'js-yaml'
 
 const RESERVED_METADATA_KEYS = [
 	'id',
@@ -18,18 +15,31 @@ const RESERVED_METADATA_KEYS = [
 const defaultOptions = {
 	glob: '**/*.md',
 	indent: null,
-	metadataKeysToIndex: [ 'tags' ],
 	normalizeMetadata: _ => _,
 	preFilter: file => !file.endsWith('.DS_Store'),
 	processedFilter: ({ metadata }) => metadata.published !== false && (!metadata.published?.getTime || metadata.published.getTime() > Date.now()),
 }
 
+const parseFile = async ({ contentFolder: absoluteRootFilepath, file: relativeFilepath, normalizeMetadata }) => {
+	const string = await readFile(join(absoluteRootFilepath, relativeFilepath), 'utf8')
+	if (string) {
+		const { blocks } = parse(string)
+		let metadata = [ 'yaml', 'frontmatter' ].includes(blocks?.[0]?.name) && load(blocks[0].content, { schema: JSON_SCHEMA })
+		if (metadata) metadata = normalizeMetadata(metadata)
+		if (blocks?.length > 1) blocks.shift()
+		// TODO generate html... think about this better...
+		const html = 'TODO generate using noddity stuff'
+		const text = 'TODO from html->text without markdown aka searchable'
+		// TODO `id` should be from filename???
+		return { metadata, file: relativeFilepath, blocks }
+	}
+}
+
 const getOptionsAndSetupFolders = async (options) => {
 	let {
-		buildFolder,
-		contentFolder,
+		output,
+		input: contentFolder,
 		glob: globString,
-		indent,
 		searchableFields,
 		stopWords,
 		...remaining
@@ -37,25 +47,27 @@ const getOptionsAndSetupFolders = async (options) => {
 
 	if (!searchableFields?.length) searchableFields = []
 
-	if (stopWords && !Array.isArray(stopWords)) throw new Error('The option "stopWords" must be an array!')
+	if (stopWords && !Array.isArray(stopWords)) throw new Error('The option "stopWords" must be an array.')
 	else stopWords = [ ...new Set(stopWords) ]
 
 	if (!isAbsolute(contentFolder)) contentFolder = resolve(process.cwd(), contentFolder)
-	if (!isAbsolute(buildFolder)) buildFolder = resolve(process.cwd(), buildFolder)
-	const indexDirectory = join(buildFolder, 'index')
-	await mkdir(indexDirectory, { recursive: true })
-	const fileDirectory = join(buildFolder, 'file')
-	await mkdir(fileDirectory, { recursive: true })
+
+	if (!output) throw new Error('Must specify an output filepath.')
+	if (!isAbsolute(output)) output = resolve(process.cwd(), output)
+	await mkdir(dirname(output), { recursive: true })
+
+	const metadataKeysToIndex = new Set()
+	for (const field of searchableFields) metadataKeysToIndex.add(field)
+	for (const field of (remaining.storeFields || [])) metadataKeysToIndex.add(field)
+	for (const field in (remaining.aggregations || {})) metadataKeysToIndex.add(field)
 
 	return {
-		buildFolder,
 		contentFolder,
-		fileDirectory,
-		indexDirectory,
 		globString,
+		metadataKeysToIndex: [ ...metadataKeysToIndex ],
+		outputFilepath: output,
 		searchableFields,
 		stopWords,
-		writeJson: async (filepath, obj) => writeFile(filepath, JSON.stringify(obj, undefined, indent), 'utf8'),
 		...remaining,
 	}
 }
@@ -67,30 +79,32 @@ const humanTime = millis => {
 	else return `${Math.round(millis / 6000) / 10} minutes` // 4_567_890 => '76.1 minutes'
 }
 
-export const searchmd = async options => {
+const pack = bundle => {
+	for (const key in (bundle.index?.storedFields || {})) {
+		if (bundle.index.storedFields[key]._file) bundle.index.storedFields[key]._file = bundle.files.findIndex(f => f === bundle.index.storedFields[key]._file)
+	}
+	return bundle
+}
+
+export const generate = async options => {
 	const start = Date.now()
 	let {
 		aggregations,
-		buildFolder,
 		contentFolder,
-		fileDirectory,
 		globString,
-		indexDirectory,
+		indent,
 		metadataKeysToIndex,
 		minisearchOptions,
 		normalizeMetadata,
+		outputFilepath,
 		preFilter,
 		processedFilter,
 		searchableFields,
 		stopWords, // TODO
-		writeJson,
 		verbose,
 	} = await getOptionsAndSetupFolders(options)
 
-	if (RESERVED_METADATA_KEYS.find(key => metadataKeysToIndex.includes(key))) throw new Error('Cannot index reserved metadata property names: ' + RESERVED_METADATA_KEYS.join(', '))
-
-	await copyFile(join(__dirname, 'copyable', 'search.js'), join(buildFolder, 'search.js'))
-	await writeJson(join(indexDirectory, 'configurations.json'), { aggregations, searchableFields })
+	if (RESERVED_METADATA_KEYS.find(key => metadataKeysToIndex.includes(key))) throw new Error('Cannot currently index reserved metadata property names: ' + RESERVED_METADATA_KEYS.join(', '))
 
 	console.log('Parsing all content files...')
 	const files = await glob(globString, { cwd: contentFolder })
@@ -106,10 +120,7 @@ export const searchmd = async options => {
 			return f
 		}))
 	if (verbose) for (const { file } of files) console.log('-', file)
-
 	const filesList = files.map(f => f.file)
-	await writeJson(join(indexDirectory, 'files-list.json'), filesList)
-	if (verbose) console.log('Wrote files list to:', join(indexDirectory, 'files-list.json'))
 
 	console.log(`Parsed ${files.length} content files and wrote files list.`)
 	const metadataToFiles = {}
@@ -128,33 +139,27 @@ export const searchmd = async options => {
 	for (const key in metadataToFiles)
 		for (const value in metadataToFiles[key])
 			metadataToFiles[key][value] = [ ...metadataToFiles[key][value] ]
-	await writeJson(join(indexDirectory, 'metadata-to-files.json'), metadataToFiles)
 	const metadataIndex = {}
 	for (const key in metadataToFiles) for (const value in metadataToFiles[key]) {
 		metadataIndex[key] = metadataIndex[key] || []
 		metadataIndex[key].push(value)
 	}
 	for (const key in metadataIndex) metadataIndex[key] = metadataIndex[key].sort()
-	await writeJson(join(indexDirectory, 'metadata.json'), metadataIndex)
+
+	console.log('Metadata values generated.')
 	if (verbose) {
-		console.log('Metadata values generated:')
 		for (const key in metadataToFiles) {
 			console.log('-', key)
 			for (const value in metadataToFiles[key]) console.log('  -', value, metadataToFiles[key][value].length)
 		}
-		console.log('Wrote metadata index to:', join(indexDirectory, 'metadata.json'))
-		console.log('Wrote metadata values to:', join(indexDirectory, 'metadata-to-files.json'))
-	} else console.log('Metadata values generated and saved.')
+	}
 
-	if (verbose) console.log('Writing all file chunks and metadata:')
+	console.log('Processing files.')
 	const chunks = []
 	for (const { _id: fileId, metadata, file, blocks } of files) {
 		if (verbose) console.log('-', fileId, file)
-
 		let blockIndex = -1
 		for (const b of blocks) b._id = `${fileId}:${++blockIndex}`
-		await writeJson(join(fileDirectory, `${fileId}.json`), { metadata, blocks })
-
 		for (const { _id: chunkId, content } of blocks) {
 			chunks.push({
 				...metadata,
@@ -164,8 +169,6 @@ export const searchmd = async options => {
 			})
 		}
 	}
-	if (verbose) console.log('Content files written to:', fileDirectory)
-	else console.log('Content files written.')
 
 	const fields = [
 		...new Set([
@@ -176,9 +179,10 @@ export const searchmd = async options => {
 		]),
 	].sort()
 	if (verbose) {
-		console.log('MiniSearch searchable fields are:')
+		console.log('MiniSearch searchable fields:')
 		for (const f of fields) console.log('-', f)
 	}
+	console.log('Building search index.')
 	const miniSearch = new MiniSearch({
 		...(minisearchOptions || {}),
 		fields,
@@ -186,7 +190,17 @@ export const searchmd = async options => {
 		storeFields: fields,
 	})
 	miniSearch.addAll(chunks)
-	await writeJson(join(indexDirectory, 'minisearch.json'), miniSearch)
 
-	console.log(`SearchMD completed in ${humanTime(Date.now() - start)}.`)
+	console.log('Writing data to disk.')
+	await writeFile(outputFilepath, JSON.stringify(pack({
+		aggregations,
+		files: filesList,
+		// This forces the MiniSearch object to convert to a normal object, for pack traversal.
+		index: JSON.parse(JSON.stringify(miniSearch)),
+		metadata: metadataIndex,
+		metadataToFiles,
+		searchableFields,
+	}), undefined, indent), 'utf8')
+
+	console.log(`Hunch completed in ${humanTime(Date.now() - start)}.`)
 }

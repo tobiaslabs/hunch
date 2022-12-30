@@ -27,7 +27,7 @@ normalization and validation, or some massaging of the search
 results before you send them back.
 
 This simple implementation doesn't do any of that, it just takes
-the query parameters and hands them to SearchMD directly.
+the query parameters and hands them to Hunch directly.
 
 */
 
