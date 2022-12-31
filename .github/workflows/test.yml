@@ -7,7 +7,7 @@ name: test
 
 on:
   push:
-    branches: [ 'feature/*' ]
+    branches: [ 'main', 'feature/*' ]
 
 jobs:
   build:
@@ -23,11 +23,5 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
-    - run: npm run test --if-present
-    - run: npm run build --if-present
-      env:
-        STAGE: local
-        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    - run: npm run test
+    - run: npm run build

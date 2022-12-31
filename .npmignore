@@ -26,6 +26,7 @@
 # other configurations
 .nvmrc
 .gitattributes
+rollup.config.js
 
 # build environments
 .travis.yml

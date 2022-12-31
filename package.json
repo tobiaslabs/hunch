@@ -18,8 +18,7 @@
     "test": "npm run test:lint && npm run test:feature",
     "test:feature": "node test/feature.test.js",
     "test:lint": "eslint *.js",
-    "build": "rollup -c",
-    "lint": "eslint"
+    "build": "rollup -c"
   },
   "repository": {
     "type": "git",
@@ -41,13 +40,14 @@
   },
   "homepage": "https://hunchjs.com",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
     "@saibotsivad/blockdown": "^3.0.0",
     "@saibotsivad/eslint-config-saibotsivad": "*",
     "itemsjs": "^2.1.20",
     "js-yaml": "^4.1.0",
     "minisearch": "^6.0.0",
-    "pointer-props": "^1.1.4",
-    "rollup": "^3.8.0",
+    "rollup": "^3.9.0",
     "tiny-glob": "^0.2.9",
     "uvu": "^0.5.6"
   }
