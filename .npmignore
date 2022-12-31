@@ -36,3 +36,6 @@
 .nycrc
 .testignore
 .istanbul.yml
+
+# the test folder gets big
+/test

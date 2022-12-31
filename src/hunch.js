@@ -38,27 +38,38 @@ const filterDocuments = params => {
 }
 
 const remapItemsResults = ({ pagination, data: { items, aggregations } }) => {
-	for (const key in (aggregations || {})) {
-		delete aggregations[key].name
-		for (const bucket of (aggregations[key].buckets || [])) {
-			bucket.count = bucket.doc_count
-			delete bucket.doc_count
-			delete bucket.selected
-		}
-	}
-	for (const item of items) {
-		item._id = item._file
-		delete item._file
-	}
-	return {
-		items, // TODO need to remap each item probably
+	// We need to be really careful here, as ItemsJS passes along references
+	// to in-memory variables. We want to modify the output, but mustn't ever
+	// modify by reference!
+	const out = {
+		aggregations: {},
+		items: [],
 		page: {
 			number: pagination.page - 1, // ItemsJS uses a 1-index
 			size: pagination.per_page,
 			total: pagination.total,
 		},
-		aggregations,
 	}
+
+	for (const agg in (aggregations || {})) {
+		out.aggregations[agg] = {
+			buckets: [],
+			title: aggregations[agg].title,
+		}
+		for (const { doc_count, key } of (aggregations[agg].buckets || [])) {
+			out.aggregations[agg].buckets.push({
+				count: doc_count,
+				key,
+			})
+		}
+	}
+	for (const { _file, ...props } of items) {
+		out.items.push({
+			...props,
+			_id: _file,
+		})
+	}
+	return out
 }
 
 const generateItemsJsChunks = minisearchIndex => {
@@ -83,7 +94,7 @@ const unpack = bundle => {
 	return bundle
 }
 
-export const hunch = ({ data }) => {
+export const hunch = ({ index: bundledIndex }) => {
 	const {
 		aggregations,
 		chunks,
@@ -91,7 +102,7 @@ export const hunch = ({ data }) => {
 		metadata,
 		metadataToFiles,
 		searchableFields,
-	} = unpack(data)
+	} = unpack(bundledIndex)
 
 	let items
 	let mini
@@ -162,10 +173,10 @@ export const hunch = ({ data }) => {
 
 		return remapItemsResults(
 			items.search({
-				per_page: 1,
+				// TODO specify aggregations etc here
+				per_page: 25,
 				custom_id_field: '_id',
 				ids: itemsIds,
-				// TODO specify aggregations etc here
 			}),
 		)
 	}

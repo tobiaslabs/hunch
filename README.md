@@ -114,6 +114,11 @@ export default {
 		'title',
 		'introduction',
 	],
+	// You'll also need to be explicit about what non-searchable, non-aggregated fields
+	// to store with the index.
+	storedFields: [
+		'published',
+	],
 }
 ```
 

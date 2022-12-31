@@ -13,3 +13,4 @@ globbed-*.js
 # built things
 /dist
 /demo/build
+/test/feature/*/build

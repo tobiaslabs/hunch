@@ -1,3 +1,4 @@
+import { cwd as currentWorkingDirectory } from 'node:process'
 import { join, dirname, isAbsolute, resolve } from 'node:path'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import glob from 'tiny-glob'
@@ -37,23 +38,26 @@ const parseFile = async ({ contentFolder: absoluteRootFilepath, file: relativeFi
 
 const getOptionsAndSetupFolders = async (options) => {
 	let {
+		cwd,
 		output,
 		input: contentFolder,
 		glob: globString,
 		searchableFields,
+		storedFields,
 		stopWords,
 		...remaining
 	} = Object.assign({}, defaultOptions, options)
 
 	if (!searchableFields?.length) searchableFields = []
+	if (!storedFields?.length) storedFields = []
 
 	if (stopWords && !Array.isArray(stopWords)) throw new Error('The option "stopWords" must be an array.')
 	else stopWords = [ ...new Set(stopWords) ]
 
-	if (!isAbsolute(contentFolder)) contentFolder = resolve(process.cwd(), contentFolder)
+	if (!isAbsolute(contentFolder)) contentFolder = resolve(cwd || currentWorkingDirectory(), contentFolder)
 
 	if (!output) throw new Error('Must specify an output filepath.')
-	if (!isAbsolute(output)) output = resolve(process.cwd(), output)
+	if (!isAbsolute(output)) output = resolve(cwd || currentWorkingDirectory(), output)
 	await mkdir(dirname(output), { recursive: true })
 
 	const metadataKeysToIndex = new Set()
@@ -63,10 +67,12 @@ const getOptionsAndSetupFolders = async (options) => {
 
 	return {
 		contentFolder,
+		cwd,
 		globString,
 		metadataKeysToIndex: [ ...metadataKeysToIndex ],
 		outputFilepath: output,
 		searchableFields,
+		storedFields,
 		stopWords,
 		...remaining,
 	}
@@ -100,6 +106,7 @@ export const generate = async options => {
 		preFilter,
 		processedFilter,
 		searchableFields,
+		storedFields, // TODO
 		stopWords, // TODO
 		verbose,
 	} = await getOptionsAndSetupFolders(options)

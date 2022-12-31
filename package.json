@@ -15,7 +15,9 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "test": "uvu src",
+    "test": "npm run test:lint && npm run test:feature",
+    "test:feature": "node test/feature.test.js",
+    "test:lint": "eslint *.js",
     "build": "rollup -c",
     "lint": "eslint"
   },
@@ -46,6 +48,7 @@
     "minisearch": "^6.0.0",
     "pointer-props": "^1.1.4",
     "rollup": "^3.8.0",
-    "tiny-glob": "^0.2.9"
+    "tiny-glob": "^0.2.9",
+    "uvu": "^0.5.6"
   }
 }
