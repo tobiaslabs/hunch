@@ -63,7 +63,8 @@ console.log('Validating all assertions...')
 for (const feature in testTree) {
 	for (const conf in testTree[feature]) {
 		test(`${feature}: ${conf}`, () => {
-			testTree[feature][conf].runner(assert, testTree[feature][conf].search)
+			const testList = testTree[feature][conf].runner(assert, testTree[feature][conf].search)
+			for (const t of testList) t()
 		})
 	}
 }
