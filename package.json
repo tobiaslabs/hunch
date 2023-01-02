@@ -30,7 +30,8 @@
     "test:normalize": "node test/normalize.test.js",
     "test:lint": "eslint *.js",
     "build": "rollup -c",
-    "postbuild": "cd demo && rm -rf build && node demo.test.js"
+    "postbuild": "cd demo && rm -rf build && node demo.test.js",
+    "release": "npm run build && changeset publish"
   },
   "repository": {
     "type": "git",
@@ -52,6 +53,7 @@
   },
   "homepage": "https://hunchjs.com",
   "devDependencies": {
+    "@changesets/cli": "^2.26.0",
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@saibotsivad/blockdown": "^3.0.0",
