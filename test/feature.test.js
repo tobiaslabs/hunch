@@ -18,8 +18,8 @@ const features = [
 	'score',
 	'sort',
 	'specific-fields',
-	// 'stop-words',
-	// 'suggest',
+	'stop-words',
+	'suggest',
 ]
 
 const original = {}

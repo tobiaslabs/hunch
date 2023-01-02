@@ -113,7 +113,6 @@ export const generate = async options => {
 		processedFilter,
 		searchableFields,
 		storedFields, // TODO
-		stopWords, // TODO
 		verbose,
 	} = await getOptionsAndSetupFolders(options)
 

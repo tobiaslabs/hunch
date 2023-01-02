@@ -69,7 +69,7 @@ const unpack = bundle => {
 	return bundle
 }
 
-export const hunch = ({ index: bundledIndex, sort: prePaginationSort }) => {
+export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords }) => {
 	const {
 		facets,
 		chunks,
@@ -89,10 +89,16 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort }) => {
 				'_content',
 			]),
 		]
+		if (stopWords && Array.isArray(stopWords)) stopWords = new Set(stopWords)
 		mini = MiniSearch.loadJS(index, {
 			idField: '_id',
 			fields,
 			storeFields: fields,
+			...(
+				typeof stopWords?.has === 'function'
+					? { processTerm: term => stopWords.has(term) ? null : term.toLowerCase() }
+					: {}
+			),
 		})
 	}
 
@@ -112,6 +118,16 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort }) => {
 		// These few properties are named exactly the same as
 		// the MiniSearch properties, so we direct copy.
 		for (const key of [ 'boost', 'fields', 'fuzzy', 'prefix' ]) if (query[key]) miniOptions[key] = query[key]
+
+		if (query.suggest) return {
+			suggestions: mini
+				.autoSuggest(query.q || '')
+				.map(({ suggestion: q, score }) => ({
+					q,
+					score: Math.round(score * 1000) / 1000,
+				})),
+		}
+
 
 		let searchResults = mini.search(query.q, miniOptions)
 		if (!searchResults.length) return EMPTY_RESULTS
