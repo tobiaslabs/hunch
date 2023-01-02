@@ -2,11 +2,10 @@ import MiniSearch from 'minisearch'
 
 const DEFAULT_PAGE_SIZE = 15
 const EMPTY_RESULTS = {
-	facets: {},
 	items: [],
 	page: {
-		number: 0,
-		total: 0,
+		offset: 0,
+		count: 0,
 	},
 }
 
