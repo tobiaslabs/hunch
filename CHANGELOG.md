@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.5
+
+### Patch Changes
+
+- 2477884: still trying to get changeset auto publishing to npm
+
 ## 0.0.4
 
 ### Patch Changes
