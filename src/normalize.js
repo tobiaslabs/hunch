@@ -23,8 +23,8 @@ const castToUniqueStrings = string => ([
  * @param {boolean} [suggest] - Whether to use the query string to suggest other search queries.
  * @param {Array<string>}} [fields] - The fields to search within.
  * @param {Array<string>}} [sort] - The fields to use for sorting.
- * @param {number} [pageNumber] - The number of pagination offsets to use in the search. (Integer. Default: none)
- * @param {number} [pageSize] - The number of pages per pagination. (Integer. Default: Infinity)
+ * @param {number} [pageOffset] - The zero-index number of pagination offsets to use in the search. (Integer. Default: none)
+ * @param {number} [pageSize] - The number of items per pagination. (Integer. Default: none)
  * @param {Object<string,number>} [boost] - The metadata key to boost by some value greater than 1. (Float. Default: 1)
  * @param {Object<string,Array<string>>} [facetInclude] - Constrain the search results to records containing metadata with exact values.
  * @param {Object<string,Array<string>>} [facetExclude] - Constrain the search results to records that does notcontaining metadata with exact values.
@@ -53,7 +53,7 @@ export const normalize = params => {
 	if (params.fields) parsed.fields = castToUniqueStrings(params.fields)
 	if (params.sort) parsed.sort = castToUniqueStrings(params.sort)
 
-	if (params['page[number]']) parsed.pageNumber = castToPositiveInt(params['page[number]'])
+	if (params['page[offset]']) parsed.pageOffset = castToPositiveInt(params['page[offset]'])
 	if (params['page[size]']) parsed.pageSize = castToPositiveInt(params['page[size]'])
 
 	for (const key in params) {
@@ -62,7 +62,7 @@ export const normalize = params => {
 			parsed.boost = parsed.boost || {}
 			parsed.boost[child] = parseFloat(params[key])
 			if (Number.isNaN(parsed.boost[child]) || parsed.boost[child] < 1) throw new Error(`The parameter "${key}" must be a valid float greater than 1.`)
-		} else if (parent === 'facet') {
+		} else if (parent === 'facets') {
 			const values = castToUniqueStrings(params[key])
 			for (const val of values) {
 				if (val[0] === '-') {

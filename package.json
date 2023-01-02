@@ -44,7 +44,6 @@
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@saibotsivad/blockdown": "^3.0.0",
     "@saibotsivad/eslint-config-saibotsivad": "*",
-    "itemsjs": "^2.1.20",
     "js-yaml": "^4.1.0",
     "minisearch": "^6.0.0",
     "rollup": "^3.9.0",

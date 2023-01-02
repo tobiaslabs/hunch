@@ -70,7 +70,7 @@ const results = search({ q: 'we get signal' })
 results = {
 	items: [ ... ],
 	page: { ... },
-	aggregation: { ... },
+	facets: { ... },
 }
 */
 ```
@@ -107,20 +107,17 @@ export default {
 	// Define where to write the index file.
 	output: './dist/hunch.json',
 	// Property names of metadata to treat as "collections", like "tags" or "authors".
-	aggregations: {
-		series: {
-			// Define some properties about the aggregations.
-			title: 'Series',
-		},
+	facets: {
+		// If it's just a flat string there's nothing to configure.
+		series: true,
+		// If it's more, like an array, you'll need to specify how Hunch
+		// should treat the values. (See documentation for more details.)
 		tags: {
-			title: 'Tags',
-			// If multiple values are possible per document, you need to specify
-			// how Hunch will treat them. (See documentation for more details.)
-			conjunction: false,
+			type: 'array',
 		}
 	},
-	// All the aggregation fields are searchable by default, and you need
-	// to explicitly specify additional searchable fields.
+	// All the facet fields are searchable by default, but you need
+	// to specify additional searchable fields.
 	searchableFields: [
 		'title',
 		'summary',
@@ -169,34 +166,28 @@ results = {
 		size: 1,
 		total: 1,
 	},
-	aggregations: {
-		series: {
-			title: 'Series',
-			buckets: [
-				{
-					key: 'Animals',
-					count: 1,
-				},
-			],
-		},
-		tags: {
-			title: 'Tags',
-			buckets: [
-				{
-					key: 'cats',
-					count: 1,
-				},
-				{
-					key: 'dogs',
-					count: 1,
-				},
-				{
-					key: 'rabbits',
-					count: 0,
-				},
-			],
-		}
-	}
+	facets: {
+		series: [
+			{
+				key: 'Animals',
+				count: 1,
+			},
+		],
+		tags: [
+			{
+				key: 'cats',
+				count: 1,
+			},
+			{
+				key: 'dogs',
+				count: 1,
+			},
+			{
+				key: 'rabbits',
+				count: 0,
+			},
+		],
+	},
 }
 */
 ```
@@ -222,12 +213,12 @@ query = {
 
 ## Additional Notes
 
-Behind the scenes this libary uses [ItemsJS](https://github.com/itemsapi/itemsjs) and [MiniSearch](https://github.com/lucaong/minisearch). In general they are pretty excellent, but one thing I can't figure out is how to remap `id` to e.g. `_id` consistently, so until that's sorted out the following metadata properties are internal-use only (if you try to specify them Hunch will throw an error): `id`, `_id`, `_content` and `_file`.
+Behind the scenes this libary uses [MiniSearch](https://github.com/lucaong/minisearch) for text searching, so look at that documentation if you need anything more esoteric.
 
 ⚠️ The output JSON file is an amalgamation of a MiniSearch index and other settings, optimized to save space. There is **no guarantee** as to the output structure or contents between Hunch versions: you **must** compile with the same version that you search with!
 
 Some things left to do:
-- [ ] A way to get the list and counts for aggregations (I'm working on this)
+- [ ] A way to get the list and counts for facets (I'm working on this)
 - [ ] Stemming (undecided if I'll support this...)
 
 ## License

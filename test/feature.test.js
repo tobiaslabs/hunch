@@ -9,11 +9,11 @@ import { hunch } from '../src/hunch.js'
 const CWD = process.cwd()
 
 const features = [
-	// 'boost',
-	// 'facet',
+	'boost',
+	'facet',
 	'full-text-lookup',
-	// 'fuzzy-search',
-	// 'metadata-sort',
+	'fuzzy-search',
+	'metadata-sort',
 	// 'pagination',
 	// 'prefix',
 	// 'score',

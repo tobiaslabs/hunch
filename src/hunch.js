@@ -1,14 +1,25 @@
 import MiniSearch from 'minisearch'
-import ItemsJS from 'itemsjs'
+
+const DEFAULT_PAGE_SIZE = 15
+const EMPTY_RESULTS = {
+	facets: {},
+	items: [],
+	page: {
+		number: 0,
+		total: 0,
+	},
+}
 
 const shouldExitEarlyForEmptySet = (metadataToFiles, params) => {
+	// TODO add to "boost" tests
 	if (params.boost)
 		for (const key in params.boost)
 			if (!metadataToFiles[key]) return true
-	if (params.facet)
-		for (const key in params.facet)
+	// TODO add to "facets" tests
+	if (params.facets)
+		for (const key in params.facets)
 			if (!metadataToFiles[key]) return true
-			else if (!params.facet[key].find(f => metadataToFiles[key][f])) return true
+			else if (!params.facets[key].find(f => metadataToFiles[key][f])) return true
 }
 
 const filterDocuments = params => {
@@ -37,41 +48,6 @@ const filterDocuments = params => {
 	}
 }
 
-const remapItemsResults = ({ pagination, data: { items, aggregations } }) => {
-	// We need to be really careful here, as ItemsJS passes along references
-	// to in-memory variables. We want to modify the output, but mustn't ever
-	// modify by reference!
-	const out = {
-		aggregations: {},
-		items: [],
-		page: {
-			number: pagination.page - 1, // ItemsJS uses a 1-index
-			size: pagination.per_page,
-			total: pagination.total,
-		},
-	}
-
-	for (const agg in (aggregations || {})) {
-		out.aggregations[agg] = {
-			buckets: [],
-			title: aggregations[agg].title,
-		}
-		for (const { doc_count, key } of (aggregations[agg].buckets || [])) {
-			out.aggregations[agg].buckets.push({
-				count: doc_count,
-				key,
-			})
-		}
-	}
-	for (const { _file, ...props } of items) {
-		out.items.push({
-			...props,
-			_id: _file,
-		})
-	}
-	return out
-}
-
 const generateItemsJsChunks = minisearchIndex => {
 	const chunks = []
 	for (const id in minisearchIndex.storedFields) {
@@ -96,7 +72,7 @@ const unpack = bundle => {
 
 export const hunch = ({ index: bundledIndex }) => {
 	const {
-		aggregations,
+		facets,
 		chunks,
 		index,
 		metadata,
@@ -104,27 +80,12 @@ export const hunch = ({ index: bundledIndex }) => {
 		searchableFields,
 	} = unpack(bundledIndex)
 
-	let items
 	let mini
-	let chunkIdToItemsJsId
-	let itemsJsIdToChunkId
 	const init = () => {
-		chunkIdToItemsJsId = {}
-		itemsJsIdToChunkId = {}
-		chunks.forEach((chunk, index) => {
-			chunkIdToItemsJsId[chunk._id] = index + 1
-			itemsJsIdToChunkId[index + 1] = chunk._id
-		})
-		items = ItemsJS(chunks, {
-			native_search_enabled: false,
-			custom_id_field: '_id',
-			aggregations,
-		})
-		console.log('Initializing MiniSearch.')
 		const fields = [
 			...new Set([
 				...(searchableFields || []),
-				...Object.keys(aggregations || {}),
+				...(facets || []),
 				'_file',
 				'_content',
 			]),
@@ -139,45 +100,72 @@ export const hunch = ({ index: bundledIndex }) => {
 	return query => {
 		// If for example you specify `facet[tags]=cats` and there are no documents
 		// containing that tag, we can just short circuit and exit early.
-		if (shouldExitEarlyForEmptySet(metadataToFiles, query)) return { results: [] }
+		if (shouldExitEarlyForEmptySet(metadataToFiles, query)) return EMPTY_RESULTS
 
-		if (!items || !mini) init()
+		// TODO if requesting facet list, can exit early as well
+		// TODO should support request document by id (filename)???
+
+		if (!mini) init()
 
 		const miniOptions = {}
 		if (query.facetInclude || query.facetExclude) miniOptions.filter = filterDocuments(query)
 
 		// These few properties are named exactly the same as
 		// the MiniSearch properties, so we direct copy.
-		for (const key of [ 'fuzzy', 'prefix', 'fields' ]) if (query[key]) miniOptions[key] = query[key]
+		for (const key of [ 'boost', 'fields', 'fuzzy', 'prefix' ]) if (query[key]) miniOptions[key] = query[key]
+
+		let searchResults = mini.search(query.q, miniOptions)
+		if (!searchResults.length) return EMPTY_RESULTS
 
 		// The results from MiniSearch may match more than one chunk, and if that happens we
-		// want to limit the IDs passed to ItemsJS so that if there are multiple chunks in a
-		// single file, it doesn't fill the aggregation bucket with only the one file.
+		// want to limit the returned items so that if there are multiple chunks in a
+		// single file, it doesn't fill the facet bucket with only the one file.
 		//
 		// This is a novel approach, and it may be misguided--splitting into chunks adds a
 		// significant amount of complexity to the search algorithm. I would appreciate any
 		// feedback, if you use this functionality.
 		//
 		// In any case, if you don't use multi-chunk documents, the results will be the same: the
-		// list of IDs to pass to ItemsJS.
-		let searchResults = mini.search(query.q, miniOptions)
-		const documentIdToItems = {}
+		// list of documents, de-duped by "parent" ID, using the highest scoring chunk.
+		const parentIdToChunkId = {}
+		const chunkIdToKeep = {}
 		for (const result of searchResults) {
 			const id = result.id.split(':')[0]
-			documentIdToItems[id] = documentIdToItems[id] || []
-			// first one is the highest score (for MiniSearch)
-			documentIdToItems[id].push(result)
+			// for MiniSearch, the first one is the highest scoring, so we just always grab that one
+			if (!parentIdToChunkId[id]) {
+				parentIdToChunkId[id] = true
+				chunkIdToKeep[result.id] = true
+			}
 		}
-		const itemsIds = []
-		for (const documentId in documentIdToItems) itemsIds.push(chunkIdToItemsJsId[documentIdToItems[documentId][0].id])
+		searchResults = searchResults.filter(r => chunkIdToKeep[r.id])
 
-		return remapItemsResults(
-			items.search({
-				// TODO specify aggregations etc here
-				per_page: 25,
-				custom_id_field: '_id',
-				ids: itemsIds,
-			}),
-		)
+		const size = query.pageSize || DEFAULT_PAGE_SIZE
+		const out = {
+			items: [],
+			page: {
+				offset: query.pageOffset || 0,
+				size,
+				count: Math.round(searchResults.length / size) + 1, // e.g. 12/10=1.2=>Math.round=1=>+1=2 pages
+			},
+		}
+		if (facets?.length) {
+			out.facets = {}
+			for (const f of facets) out.facets[f] = {}
+		}
+		const addToFacets = (facet, key) => out.facets[facet][key] = (out.facets[facet][key] || 0) + 1
+
+		const start = size * out.page.offset // e.g. pageOffset = 3, start = 10*3 = 30
+		const end = start + size // e.g. 30+10 = 40
+		let index = 0
+		for (const { _file, score, id: ignore1, terms: ignore2, match: ignore3, ...props } of searchResults) {
+			if (facets?.length) for (const f of facets) if (props[f]) {
+				if (Array.isArray(props[f])) for (const p of props[f]) addToFacets(f, p)
+				else addToFacets(f, props[f])
+			}
+			if (index >= start && index < end) out.items.push({ _id: _file, _score: Math.round(score * 1000) / 1000, ...props })
+			index++
+		}
+
+		return out
 	}
 }

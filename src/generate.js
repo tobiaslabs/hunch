@@ -7,10 +7,16 @@ import { parse } from '@saibotsivad/blockdown'
 import { load, JSON_SCHEMA } from 'js-yaml'
 
 const RESERVED_METADATA_KEYS = [
-	'id',
-	'_id',
 	'_content',
 	'_file',
+	'_id',
+	// For some reason, even though specifying the ID field as `_id`, yet MiniSearch continues
+	// to use `id`. This sure seems like a bug...
+	'id',
+	// this is some MiniSearch stuff here... I think I'll need to
+	'match',
+	'score',
+	'terms',
 ]
 
 const defaultOptions = {
@@ -63,7 +69,7 @@ const getOptionsAndSetupFolders = async (options) => {
 	const metadataKeysToIndex = new Set()
 	for (const field of searchableFields) metadataKeysToIndex.add(field)
 	for (const field of (remaining.storeFields || [])) metadataKeysToIndex.add(field)
-	for (const field in (remaining.aggregations || {})) metadataKeysToIndex.add(field)
+	for (const field of (remaining.facets || [])) metadataKeysToIndex.add(field)
 
 	return {
 		contentFolder,
@@ -95,7 +101,7 @@ const pack = bundle => {
 export const generate = async options => {
 	const start = Date.now()
 	let {
-		aggregations,
+		facets,
 		contentFolder,
 		globString,
 		indent,
@@ -111,7 +117,7 @@ export const generate = async options => {
 		verbose,
 	} = await getOptionsAndSetupFolders(options)
 
-	if (RESERVED_METADATA_KEYS.find(key => metadataKeysToIndex.includes(key))) throw new Error('Cannot currently index reserved metadata property names: ' + RESERVED_METADATA_KEYS.join(', '))
+	if (RESERVED_METADATA_KEYS.find(key => metadataKeysToIndex.includes(key))) throw new Error('Cannot index reserved metadata property names: ' + RESERVED_METADATA_KEYS.join(', '))
 
 	console.log('Parsing all content files...')
 	const files = await glob(globString, { cwd: contentFolder })
@@ -180,7 +186,7 @@ export const generate = async options => {
 	const fields = [
 		...new Set([
 			...(searchableFields || []),
-			...Object.keys(aggregations || {}),
+			...(facets || []),
 			'_content',
 			'_file',
 		]),
@@ -200,7 +206,7 @@ export const generate = async options => {
 
 	console.log('Writing data to disk.')
 	await writeFile(outputFilepath, JSON.stringify(pack({
-		aggregations,
+		facets,
 		files: filesList,
 		// This forces the MiniSearch object to convert to a normal object, for pack traversal.
 		index: JSON.parse(JSON.stringify(miniSearch)),
