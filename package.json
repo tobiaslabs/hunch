@@ -1,6 +1,6 @@
 {
   "name": "hunch",
-  "version": "0.0.0-alpha.1",
+  "version": "0.0.3",
   "description": "Compiled search for your static Markdown files.",
   "type": "module",
   "module": "dist/index.js",
@@ -25,6 +25,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "changeset": "changeset",
     "test": "npm run test:lint && npm run test:feature && npm run test:normalize",
     "test:feature": "node test/feature.test.js",
     "test:normalize": "node test/normalize.test.js",
@@ -38,6 +39,7 @@
     "url": "git+https://github.com/tobiaslabs/hunch.git"
   },
   "keywords": [
+    "hunch",
     "search",
     "11ty",
     "lambda"
