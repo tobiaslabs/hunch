@@ -1,5 +1,11 @@
 const BRACKETED_QUERY_PARAM = /([^[]+)\[([^\]]+)]/
 
+const castToObject = p => {
+	const obj = {}
+	for (const c of p.keys()) obj[c] = p.get(c)
+	return obj
+}
+
 const castToPositiveInt = (params, key) => {
 	const value = parseInt(params[key], 10)
 	if (Number.isNaN(value) || value <= 0) throw new Error(`The parameter "${key}" must be a positive integer.`)
@@ -39,6 +45,7 @@ const castToUniqueStrings = string => ([
  */
 export const normalize = params => {
 	params = params || {}
+	if (params instanceof URLSearchParams) params = castToObject(params)
 
 	const parsed = {}
 

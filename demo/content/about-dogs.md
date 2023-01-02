@@ -5,6 +5,6 @@ tags:
 published: 2022-02-02
 ---
 
-Oh boy do I have a lot of **really good** things to say about dogs.
+Oh wow do I have a lot of **really good** things to say about dogs.
 
 These words are the same in cats and dogs.

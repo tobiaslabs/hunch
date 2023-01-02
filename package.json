@@ -4,21 +4,33 @@
   "description": "Compiled search for your static Markdown files.",
   "type": "module",
   "module": "dist/index.js",
-  "unpkg": "dist/index.min.js",
   "main": "dist/index.cjs",
-  "types": "index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./generate": {
+      "import": "./dist/generate.js",
+      "require": "./dist/generate.cjs"
+    },
+    "./hunch": {
+      "import": "./dist/hunch.js",
+      "require": "./dist/hunch.cjs"
+    },
+    "./normalize": {
+      "import": "./dist/normalize.js",
+      "require": "./dist/normalize.cjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "test": "npm run test:lint && npm run test:feature",
+    "test": "npm run test:lint && npm run test:feature && npm run test:normalize",
     "test:feature": "node test/feature.test.js",
+    "test:normalize": "node test/normalize.test.js",
     "test:lint": "eslint *.js",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "postbuild": "cd demo && rm -rf build && node demo.test.js"
   },
   "repository": {
     "type": "git",
