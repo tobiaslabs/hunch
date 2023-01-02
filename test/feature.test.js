@@ -13,10 +13,10 @@ const features = [
 	'facet',
 	'full-text-lookup',
 	'fuzzy-search',
-	'metadata-sort',
-	// 'pagination',
+	'pagination',
 	// 'prefix',
 	// 'score',
+	'sort',
 	// 'specific-fields',
 	// 'stop-words',
 	// 'suggest',
@@ -45,14 +45,17 @@ for (const feature of features) {
 	const unsilence = silence()
 	for (const conf of configurations) {
 		log('  -', conf)
-		const { default: options } = await import(`./feature/${feature}/${conf}.config.js`)
+		const { default: options, setup } = await import(`./feature/${feature}/${conf}.config.js`)
 		options.cwd = join(CWD, 'test', 'feature', feature)
 		options.indent = '\t'
 		options.input = `./content-${conf}`
 		options.output = `./build/${conf}.json`
 		await generate(options)
 		testTree[feature][conf] = {
-			search: hunch({ index: JSON.parse(await readFile(`./test/feature/${feature}/build/${conf}.json`, 'utf8')) }),
+			search: hunch({
+				...(setup || {}),
+				index: JSON.parse(await readFile(`./test/feature/${feature}/build/${conf}.json`, 'utf8')),
+			}),
 			runner: await import(`./feature/${feature}/${conf}.test.js`).then(i => i.default),
 		}
 	}

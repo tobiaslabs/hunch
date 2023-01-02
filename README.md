@@ -15,8 +15,8 @@ Hunch supports these search features:
 - Ranking [docs](https://hunchjs.com/docs/searching#score)
 - Facets [docs](https://hunchjs.com/docs/searching#facet)
 - Pagination [docs](https://hunchjs.com/docs/searching#pagination)
-- Stop-Words [docs](https://hunchjs.com/docs/searching#stop-words)
-- Sort by metadata properties [docs](https://hunchjs.com/docs/searching#metadata-sort)
+- Stop-Words [docs](https://hunchjs.com/docs/configuration#stop-words)
+- Sort by alternate strategy [docs](https://hunchjs.com/docs/searching#sort)
 
 Hunch compiles a search index to store as a JSON file, which you load and use wherever you want to perform search: AWS Lambda, Cloudflare Worker, even directly in the browser!
 

@@ -22,7 +22,7 @@ const castToUniqueStrings = string => ([
  * @param {boolean} [prefix] - Whether to use the query string as a prefix.
  * @param {boolean} [suggest] - Whether to use the query string to suggest other search queries.
  * @param {Array<string>}} [fields] - The fields to search within.
- * @param {Array<string>}} [sort] - The fields to use for sorting.
+ * @param {Any} [sort] - The sort property passed to the pre-pagination sort function.
  * @param {number} [pageOffset] - The zero-index number of pagination offsets to use in the search. (Integer. Default: none)
  * @param {number} [pageSize] - The number of items per pagination. (Integer. Default: none)
  * @param {Object<string,number>} [boost] - The metadata key to boost by some value greater than 1. (Float. Default: 1)
@@ -51,7 +51,8 @@ export const normalize = params => {
 	if (params.suggest) parsed.suggest = castToBoolean(params, 'suggest')
 
 	if (params.fields) parsed.fields = castToUniqueStrings(params.fields)
-	if (params.sort) parsed.sort = castToUniqueStrings(params.sort)
+
+	if (params.sort !== undefined) parsed.sort = params.sort
 
 	if (params['page[offset]']) parsed.pageOffset = castToPositiveInt(params['page[offset]'])
 	if (params['page[size]']) parsed.pageSize = castToPositiveInt(params['page[size]'])

@@ -70,7 +70,7 @@ const unpack = bundle => {
 	return bundle
 }
 
-export const hunch = ({ index: bundledIndex }) => {
+export const hunch = ({ index: bundledIndex, sort: prePaginationSort }) => {
 	const {
 		facets,
 		chunks,
@@ -138,6 +138,7 @@ export const hunch = ({ index: bundledIndex }) => {
 			}
 		}
 		searchResults = searchResults.filter(r => chunkIdToKeep[r.id])
+		if (prePaginationSort) searchResults = prePaginationSort({ items: searchResults, query })
 
 		const size = query.pageSize || DEFAULT_PAGE_SIZE
 		const out = {
@@ -145,7 +146,9 @@ export const hunch = ({ index: bundledIndex }) => {
 			page: {
 				offset: query.pageOffset || 0,
 				size,
-				count: Math.round(searchResults.length / size) + 1, // e.g. 12/10=1.2=>Math.round=1=>+1=2 pages
+				count: searchResults.length % size
+					? Math.round(searchResults.length / size) + 1 // e.g. 12/10=1.2=>Math.round=1=>+1=2 pages
+					: searchResults.length / size, // e.g. 12%6=0=>12/6=2 pages
 			},
 		}
 		if (facets?.length) {
