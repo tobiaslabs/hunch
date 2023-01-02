@@ -17,7 +17,7 @@ const features = [
 	'prefix',
 	'score',
 	'sort',
-	// 'specific-fields',
+	'specific-fields',
 	// 'stop-words',
 	// 'suggest',
 ]
