@@ -4,8 +4,9 @@ const DEFAULT_PAGE_SIZE = 15
 const EMPTY_RESULTS = {
 	items: [],
 	page: {
+		items: 0,
 		offset: 0,
-		count: 0,
+		pages: 0,
 	},
 }
 
@@ -72,12 +73,12 @@ const unpack = bundle => {
 	return bundle
 }
 
-export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords }) => {
+export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords, maxPageSize }) => {
 	const {
 		facets,
 		chunks,
 		fileIdToIndex,
-		index,
+		index: miniSearchIndex,
 		metadata,
 		metadataToFiles,
 		searchableFields,
@@ -96,7 +97,7 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords 
 			]),
 		]
 		if (stopWords && Array.isArray(stopWords)) stopWords = new Set(stopWords)
-		mini = MiniSearch.loadJS(index, {
+		mini = MiniSearch.loadJS(miniSearchIndex, {
 			idField: '_id',
 			fields,
 			storeFields: fields,
@@ -113,28 +114,35 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords 
 		// containing that tag, we can just short circuit and exit early.
 		if (shouldExitEarlyForEmptySet(metadataToFiles, query)) return EMPTY_RESULTS
 
-		// TODO if requesting facet list, can exit early as well
 		// TODO should support request document by id (filename)???
 
-		if (!mini) init()
-
-		const miniOptions = {}
-		if (query.facetInclude || query.facetExclude) miniOptions.filter = filterDocuments(query)
-
-		// These few properties are named exactly the same as
-		// the MiniSearch properties, so we direct copy.
-		for (const key of [ 'boost', 'fields', 'fuzzy', 'prefix' ]) if (query[key]) miniOptions[key] = query[key]
-
-		if (query.suggest) return {
-			suggestions: mini
-				.autoSuggest(query.q || '')
-				.map(({ suggestion: q, score }) => ({
-					q,
-					score: Math.round(score * 1000) / 1000,
-				})),
+		let searchResults = []
+		if (!query.q && !query.suggest) {
+			for (const documentId in miniSearchIndex.storedFields) {
+				const item = { ...miniSearchIndex.storedFields[documentId] }
+				item.id = miniSearchIndex.documentIds[documentId]
+				item.score = 0
+				searchResults.push(item)
+			}
+		} else {
+			if (!mini) init()
+			if (query.suggest) return {
+				suggestions: mini
+					.autoSuggest(query.q || '')
+					.map(({ suggestion: q, score }) => ({
+						q,
+						score: Math.round(score * 1000) / 1000,
+					})),
+			}
+			if (query.q) {
+				const miniOptions = {}
+				if (query.facetInclude || query.facetExclude) miniOptions.filter = filterDocuments(query)
+				// These few properties are named exactly the same as
+				// the MiniSearch properties, so we can direct copy.
+				for (const key of [ 'boost', 'fields', 'fuzzy', 'prefix' ]) if (query[key]) miniOptions[key] = query[key]
+				searchResults = mini.search(query.q, miniOptions)
+			}
 		}
-
-		let searchResults = mini.search(query.q, miniOptions)
 		if (!searchResults.length) return EMPTY_RESULTS
 
 		// The results from MiniSearch may match more than one chunk, and if that happens we
@@ -160,16 +168,21 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords 
 		searchResults = searchResults.filter(r => chunkIdToKeep[r.id])
 		if (prePaginationSort) searchResults = prePaginationSort({ items: searchResults, query })
 
-		const size = query.pageSize || DEFAULT_PAGE_SIZE
+		const size = query.pageSize === undefined || query.pageSize < 0
+			? DEFAULT_PAGE_SIZE
+			: query.pageSize
 		const out = {
 			items: [],
-			page: {
-				offset: query.pageOffset || 0,
-				size,
-				count: searchResults.length % size
-					? Math.round(searchResults.length / size) + 1 // e.g. 12/10=1.2=>Math.round=1=>+1=2 pages
-					: searchResults.length / size, // e.g. 12%6=0=>12/6=2 pages
-			},
+			page: size === 0
+				? { items: searchResults.length }
+				: {
+					items: searchResults.length,
+					offset: query.pageOffset || 0,
+					pages: searchResults.length % size
+						? Math.round(searchResults.length / size) + 1 // e.g. 12/10=1.2=>Math.round=1=>+1=2 pages
+						: searchResults.length / size, // e.g. 12%6=0=>12/6=2 pages
+					size,
+				},
 		}
 		if (facets?.length) {
 			out.facets = {}

@@ -7,7 +7,7 @@ export default (assert, search) => [
 					{ _id: 'file1.md', _score: 0.768, _content: '\nwords only present in file1\n' },
 					{ _id: 'file2.md', _score: 0.661, _content: '\nwords only present in file2 next part shared with file3\n' },
 				],
-				page: { offset: 0, size: 15, count: 1 },
+				page: { offset: 0, size: 15, pages: 1, items: 2 },
 			},
 			'only two files have "present"',
 		)
@@ -20,7 +20,7 @@ export default (assert, search) => [
 					{ _id: 'file1.md', _score: 12.281, _content: '\nwords only present in file1\n' },
 					{ _id: 'file2.md', _score: 10.579, _content: '\nwords only present in file2 next part shared with file3\n' },
 				],
-				page: { offset: 0, size: 15, count: 1 },
+				page: { offset: 0, size: 15, pages: 1, items: 2 },
 			},
 			'only two files have the full phrase',
 		)
@@ -33,7 +33,7 @@ export default (assert, search) => [
 					{ _id: 'file3.md', _score: 11.171, _content: '\nthis is file3 next part shared with file2\n' },
 					{ _id: 'file2.md', _score: 10.579, _content: '\nwords only present in file2 next part shared with file3\n' },
 				],
-				page: { offset: 0, size: 15, count: 1 },
+				page: { offset: 0, size: 15, pages: 1, items: 2 },
 			},
 			'only two files have the full phrase',
 		)

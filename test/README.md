@@ -26,3 +26,5 @@ export default (assert, search) => [
 	},
 ]
 ```
+
+In the "basic" tests, try to assert the full result set at least once, because the feature tests also serve as examples and are linked to from other documentation.

@@ -13,6 +13,7 @@ const features = [
 	'facet',
 	'full-text-lookup',
 	'fuzzy-search',
+	'get-facets',
 	'pagination',
 	'prefix',
 	'score',

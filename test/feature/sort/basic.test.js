@@ -9,7 +9,7 @@ export default (assert, search) => [
 					{ _id: 'file1.md', _score: 0.3, _content: '\ncool\n', series: 'bbb' },
 					{ _id: 'file2.md', _score: 0.253, _content: '\ncool and curious\n', series: 'aaa' },
 				],
-				page: { offset: 0, size: 15, count: 1 },
+				page: { offset: 0, size: 15, pages: 1, items: 2 },
 				facets: {
 					series: {
 						aaa: 1,
@@ -31,7 +31,7 @@ export default (assert, search) => [
 					{ _id: 'file2.md', _score: 0.253, _content: '\ncool and curious\n', series: 'aaa' },
 					{ _id: 'file1.md', _score: 0.3, _content: '\ncool\n', series: 'bbb' },
 				],
-				page: { offset: 0, size: 15, count: 1 },
+				page: { offset: 0, size: 15, pages: 1, items: 2 },
 				facets: {
 					series: {
 						aaa: 1,

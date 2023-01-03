@@ -10,7 +10,7 @@ export default (assert, search) => [
 					{ _id: 'file2.md', _score: 0.273, _content: '\nwords in file2\n', tags: [ 'dogs' ], podcastId: 123 },
 					{ _id: 'file3.md', _score: 0.273, _content: '\nwords in file3\n', tags: [ 'cats', 'dogs' ], podcastId: 456 },
 				],
-				page: { offset: 0, size: 15, count: 1 },
+				page: { offset: 0, size: 15, pages: 1, items: 2 },
 				facets: {
 					tags: {
 						dogs: 2,
