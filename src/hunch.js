@@ -168,9 +168,10 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords,
 		searchResults = searchResults.filter(r => chunkIdToKeep[r.id])
 		if (prePaginationSort) searchResults = prePaginationSort({ items: searchResults, query })
 
-		const size = query.pageSize === undefined || query.pageSize < 0
+		let size = query.pageSize === undefined || query.pageSize < 0
 			? DEFAULT_PAGE_SIZE
 			: query.pageSize
+		if (maxPageSize && size > maxPageSize) size = maxPageSize
 		const out = {
 			items: [],
 			page: size === 0
