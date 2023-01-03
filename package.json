@@ -5,6 +5,7 @@
   "type": "module",
   "module": "dist/index.js",
   "main": "dist/index.cjs",
+  "bin": "bin.cjs",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -31,7 +32,7 @@
     "test:normalize": "node test/normalize.test.js",
     "test:lint": "eslint *.js",
     "build": "rollup -c",
-    "postbuild": "cd demo && rm -rf build && node demo.test.js",
+    "demo": "cd demo && rm -rf build && node demo.test.js",
     "release": "npm run build && changeset publish"
   },
   "repository": {
@@ -61,11 +62,13 @@
     "@changesets/cli": "^2.26.0",
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-replace": "^5.0.2",
     "@saibotsivad/blockdown": "^3.0.0",
     "@saibotsivad/eslint-config-saibotsivad": "*",
     "js-yaml": "^4.1.0",
     "minisearch": "^6.0.0",
     "rollup": "^3.9.0",
+    "sade": "^1.8.1",
     "tiny-glob": "^0.2.9",
     "uvu": "^0.5.6"
   }

@@ -1,5 +1,9 @@
+import { readFile } from 'node:fs/promises'
 import commonjs from '@rollup/plugin-commonjs'
+import replace from '@rollup/plugin-replace'
 import resolve from '@rollup/plugin-node-resolve'
+
+const { version } = JSON.parse(await readFile('./package.json', 'utf8'))
 
 const normal = [
 	'generate',
@@ -21,6 +25,28 @@ export default [
 			},
 		],
 		external: normal.map(name => `./${name}.js`),
+	},
+	{
+		input: 'src/cli.js',
+		output: [
+			{
+				format: 'cjs',
+				file: 'dist/cli.cjs',
+			},
+		],
+		external: normal.map(name => `./${name}.js`),
+		plugins: [
+			replace({
+				preventAssignment: true,
+				values: {
+					__build_version__: version,
+				},
+			}),
+			commonjs(),
+			resolve({
+				browser: true,
+			}),
+		],
 	},
 	...normal.map(name => ({
 		input: `src/${name}.js`,

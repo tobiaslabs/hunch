@@ -84,13 +84,6 @@ const getOptionsAndSetupFolders = async (options) => {
 	}
 }
 
-const humanTime = millis => {
-	// numbers picked to look nice-enough
-	if (millis < 1_000) return `${millis} milliseconds`
-	if (millis < 120_000) return `${Math.round(millis / 100) / 10} seconds` // 113_456 => '113.5' seconds
-	else return `${Math.round(millis / 6000) / 10} minutes` // 4_567_890 => '76.1 minutes'
-}
-
 const pack = bundle => {
 	for (const key in (bundle.index?.storedFields || {})) {
 		if (bundle.index.storedFields[key]._file) bundle.index.storedFields[key]._file = bundle.files.findIndex(f => f === bundle.index.storedFields[key]._file)
@@ -99,7 +92,6 @@ const pack = bundle => {
 }
 
 export const generate = async options => {
-	const start = Date.now()
 	let {
 		facets,
 		contentFolder,
@@ -213,6 +205,4 @@ export const generate = async options => {
 		metadataToFiles,
 		searchableFields,
 	}), undefined, indent), 'utf8')
-
-	console.log(`Hunch completed in ${humanTime(Date.now() - start)}.`)
 }

@@ -43,9 +43,9 @@ Or use it in code:
 ```js
 import { generate } from 'hunch'
 await generate({
-	input: './site',
-	output: './dist/hunch.json',
-	// other options
+  input: './site',
+  output: './dist/hunch.json',
+  // other options
 })
 ```
 
@@ -68,9 +68,9 @@ const search = hunch(index)
 const results = search({ q: 'we get signal' })
 /*
 results = {
-	items: [ ... ],
-	page: { ... },
-	facets: { ... },
+  items: [ ... ],
+  page: { ... },
+  facets: { ... },
 }
 */
 ```
@@ -102,32 +102,32 @@ A simple configuration file would specify the content folder (where the Markdown
 ```js
 // hunch.config.js
 export default {
-	// Define the folder to scan.
-	input: './site',
-	// Define where to write the index file.
-	output: './dist/hunch.json',
-	// Property names of metadata to treat as "collections", like "tags" or "authors".
-	facets: {
-		// If it's just a flat string there's nothing to configure.
-		series: true,
-		// If it's more, like an array, you'll need to specify how Hunch
-		// should treat the values. (See documentation for more details.)
-		tags: {
-			type: 'array',
-		}
-	},
-	// All the facet fields are searchable by default, but you need
-	// to specify additional searchable fields.
-	searchableFields: [
-		'title',
-		'summary',
-	],
-	// Fields that are not searchable that you want available for access
-	// need to be specified. These fields are stored in the index JSON, but
-	// not used by Hunch.
-	storedFields: [
-		'published',
-	],
+  // Define the folder to scan.
+  input: './site',
+  // Define where to write the index file.
+  output: './dist/hunch.json',
+  // Property names of metadata to treat as "collections", like "tags" or "authors".
+  facets: {
+    // If it's just a flat string there's nothing to configure.
+    series: true,
+    // If it's more, like an array, you'll need to specify how Hunch
+    // should treat the values. (See documentation for more details.)
+    tags: {
+      type: 'array',
+    }
+  },
+  // All the facet fields are searchable by default, but you need
+  // to specify additional searchable fields.
+  searchableFields: [
+    'title',
+    'summary',
+  ],
+  // Fields that are not searchable that you want available for access
+  // need to be specified. These fields are stored in the index JSON, but
+  // not used by Hunch.
+  storedFields: [
+    'published',
+  ],
 }
 ```
 
@@ -144,50 +144,50 @@ const search = hunch({ data })
 
 // Then query it:
 const results = search({
-	q: 'fancy words',
-	facetInclude: { tags: [ 'cats' ] },
-	facetExclude: { tags: [ 'rabbits' ] },
+  q: 'fancy words',
+  facetInclude: { tags: [ 'cats' ] },
+  facetExclude: { tags: [ 'rabbits' ] },
 })
 /*
 results = {
-	items: [
-		{
-			title: 'About Cats & Dogs',
-			tags: [ 'cats', 'dogs' ],
-			summary: 'Where I talk about pets.',
-			published: '2022-12-29',
-			series: 'Animals',
-			_id: '2022-12-29/cats-and-dogs.md',
-			_content: 'Fancy words about cats and dogs.',
-		}
-	],
-	page: {
-		number: 0,
-		size: 1,
-		total: 1,
-	},
-	facets: {
-		series: [
-			{
-				key: 'Animals',
-				count: 1,
-			},
-		],
-		tags: [
-			{
-				key: 'cats',
-				count: 1,
-			},
-			{
-				key: 'dogs',
-				count: 1,
-			},
-			{
-				key: 'rabbits',
-				count: 0,
-			},
-		],
-	},
+  items: [
+    {
+      title: 'About Cats & Dogs',
+      tags: [ 'cats', 'dogs' ],
+      summary: 'Where I talk about pets.',
+      published: '2022-12-29',
+      series: 'Animals',
+      _id: '2022-12-29/cats-and-dogs.md',
+      _content: 'Fancy words about cats and dogs.',
+    }
+  ],
+  page: {
+    number: 0,
+    size: 1,
+    total: 1,
+  },
+  facets: {
+    series: [
+      {
+        key: 'Animals',
+        count: 1,
+      },
+    ],
+    tags: [
+      {
+        key: 'cats',
+        count: 1,
+      },
+      {
+        key: 'dogs',
+        count: 1,
+      },
+      {
+        key: 'rabbits',
+        count: 0,
+      },
+    ],
+  },
 }
 */
 ```
@@ -199,14 +199,14 @@ If you are using Hunch as an API with a URL query parameter interface, such as A
 ```js
 import { normalize } from 'hunch'
 const query = normalize({
-	q: 'fancy words',
-	'facet[tags]': 'cats,-rabbits',
+  q: 'fancy words',
+  'facet[tags]': 'cats,-rabbits',
 })
 /*
 query = {
-	q: 'fancy words',
-	facetInclude: { tags: [ 'cats' ] },
-	facetExclude: { tags: [ 'rabbits' ] },
+  q: 'fancy words',
+  facetInclude: { tags: [ 'cats' ] },
+  facetExclude: { tags: [ 'rabbits' ] },
 }
 */
 ```
