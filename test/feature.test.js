@@ -19,14 +19,17 @@ const features = [
 	'sort',
 	'specific-fields',
 	'stop-words',
+	'stored-fields',
 	'suggest',
 ]
+
+const verbose = process.argv.includes('--verbose')
 
 const original = {}
 const silence = () => {
 	for (const level in console) {
 		original[level] = console[level]
-		console[level] = _ => _
+		if (!verbose) console[level] = _ => _
 	}
 	return () => { for (const level in console) console[level] = original[level] }
 }
@@ -50,6 +53,7 @@ for (const feature of features) {
 		options.indent = '\t'
 		options.input = `./content-${conf}`
 		options.output = `./build/${conf}.json`
+		if (verbose) options.verbose = true
 		await generate(options)
 		testTree[feature][conf] = {
 			search: hunch({

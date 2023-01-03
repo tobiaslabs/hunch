@@ -104,7 +104,7 @@ export const generate = async options => {
 		preFilter,
 		processedFilter,
 		searchableFields,
-		storedFields, // TODO
+		storedFields,
 		verbose,
 	} = await getOptionsAndSetupFolders(options)
 
@@ -158,6 +158,17 @@ export const generate = async options => {
 		}
 	}
 
+	// We store the additional fields outside the index, to not grow it too much, but
+	// if the metadata is already in the index we don't store it.
+	const fieldsToStore = (storedFields || []).filter(field => !metadataToFiles[field])
+	const fileToStoredFields = {}
+	if (fieldsToStore.length) for (const { _id: fileId, metadata } of files) {
+		for (const field of fieldsToStore) if (metadata && metadata[field]) {
+			fileToStoredFields[fileId] = fileToStoredFields[fileId] || {}
+			fileToStoredFields[fileId][field] = metadata[field]
+		}
+	}
+
 	console.log('Processing files.')
 	const chunks = []
 	for (const { _id: fileId, metadata, file, blocks } of files) {
@@ -204,5 +215,7 @@ export const generate = async options => {
 		metadata: metadataIndex,
 		metadataToFiles,
 		searchableFields,
+		storedFieldKeys: storedFields,
+		storedFields: fileToStoredFields,
 	}), undefined, indent), 'utf8')
 }

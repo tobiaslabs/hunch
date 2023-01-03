@@ -66,6 +66,9 @@ const unpack = bundle => {
 		bundle.index.storedFields[key]._file = bundle.files[bundle.index.storedFields[key]._file]
 	}
 	bundle.chunks = generateItemsJsChunks(bundle.index)
+	bundle.fileIdToIndex = {}
+	let index = 0
+	for (const fileId of bundle.files) bundle.fileIdToIndex[fileId] = index++
 	return bundle
 }
 
@@ -73,10 +76,13 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords 
 	const {
 		facets,
 		chunks,
+		fileIdToIndex,
 		index,
 		metadata,
 		metadataToFiles,
 		searchableFields,
+		storedFieldKeys,
+		storedFields,
 	} = unpack(bundledIndex)
 
 	let mini
@@ -127,7 +133,6 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords 
 					score: Math.round(score * 1000) / 1000,
 				})),
 		}
-
 
 		let searchResults = mini.search(query.q, miniOptions)
 		if (!searchResults.length) return EMPTY_RESULTS
@@ -183,6 +188,11 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords 
 			if (index >= start && index < end) out.items.push({ _id: _file, _score: Math.round(score * 1000) / 1000, ...props })
 			index++
 		}
+
+		if (storedFieldKeys?.length)
+			for (const item of out.items)
+				for (const key of storedFieldKeys)
+					if (storedFields[fileIdToIndex[item._id]]?.[key]) item[key] = storedFields[fileIdToIndex[item._id]][key]
 
 		return out
 	}
