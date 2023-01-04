@@ -42,9 +42,8 @@ Or use it in code:
 
 ```js
 import { generate } from 'hunch'
-await generate({
+const index = await generate({
   input: './site',
-  output: './dist/hunch.json',
   // other options
 })
 ```

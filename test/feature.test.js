@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { readdir, readFile } from 'node:fs/promises'
+import { readdir } from 'node:fs/promises'
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 
@@ -52,15 +52,12 @@ for (const feature of features) {
 		log('  -', conf)
 		const { default: options, setup } = await import(`./feature/${feature}/${conf}.config.js`)
 		options.cwd = join(CWD, 'test', 'feature', feature)
-		options.indent = '\t'
 		options.input = `./content-${conf}`
-		options.output = `./build/${conf}.json`
 		if (verbose) options.verbose = true
-		await generate(options)
 		testTree[feature][conf] = {
 			search: hunch({
 				...(setup || {}),
-				index: JSON.parse(await readFile(`./test/feature/${feature}/build/${conf}.json`, 'utf8')),
+				index: await generate(options),
 			}),
 			runner: await import(`./feature/${feature}/${conf}.test.js`).then(i => i.default),
 		}

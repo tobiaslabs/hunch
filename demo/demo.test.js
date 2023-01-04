@@ -1,14 +1,12 @@
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 
 import { generate } from '../dist/generate.js'
 import { normalize } from '../dist/normalize.js'
 import { hunch } from '../dist/hunch.js'
 
 // We can use the CLI, or programmatically call Hunch, like this:
-await generate({
+const hunchIndex = await generate({
 	input: './content',
-	output: './build/hunch.json',
-	indent: '\t',
 	searchableFields: [
 		'title',
 	],
@@ -23,6 +21,8 @@ await generate({
 	],
 	verbose: true,
 })
+await mkdir('build')
+await writeFile('./build/hunch.json', JSON.stringify(hunchIndex, undefined, '\t'), 'utf8')
 console.log('HunchJS completed...')
 
 // You could even use Hunch for a CLI-based search tool, I suppose!

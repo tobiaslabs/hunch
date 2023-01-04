@@ -2,7 +2,7 @@ const packTree = (initialKeys, initialValues, rootAllowedKeys) => {
 	const keys = initialKeys || []
 	const values = initialValues || []
 	const byId = {}
-	const recursiveReplacer = obj => {
+	const recursiveReplacer = (obj, restrictedKeys) => {
 		let replace
 		if (Array.isArray(obj)) {
 			replace = []
@@ -11,15 +11,16 @@ const packTree = (initialKeys, initialValues, rootAllowedKeys) => {
 			}
 		} else if (typeof obj === 'object') {
 			replace = {}
-			const objectKeys = rootAllowedKeys || Object.keys(obj)
-			for (const key of objectKeys) {
-				let keyIndex = keys.findIndex(k => k === key)
-				if (keyIndex < 0) {
-					keyIndex = keys.length
-					keys.push(key)
+			const objectKeys = restrictedKeys || Object.keys(obj)
+			for (const key of objectKeys)
+				if (obj[key] !== undefined) {
+					let keyIndex = keys.findIndex(k => k === key)
+					if (keyIndex < 0) {
+						keyIndex = keys.length
+						keys.push(key)
+					}
+					replace[keyIndex] = recursiveReplacer(obj[key])
 				}
-				replace[keyIndex] = recursiveReplacer(obj[key])
-			}
 		} else if (obj !== undefined) {
 			let valueIndex = values.findIndex(v => v === obj)
 			if (valueIndex < 0) {
@@ -31,7 +32,10 @@ const packTree = (initialKeys, initialValues, rootAllowedKeys) => {
 		return replace
 	}
 	return {
-		add: (id, obj) => byId[id] = recursiveReplacer(obj),
+		add: (id, obj) => {
+			const val = recursiveReplacer(obj, rootAllowedKeys)
+			if (val !== undefined) byId[id] = val
+		},
 		done: () => ({ keys, values, byId }),
 	}
 }

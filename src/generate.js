@@ -1,6 +1,5 @@
 import { cwd as currentWorkingDirectory } from 'node:process'
-import { dirname, isAbsolute, resolve } from 'node:path'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { isAbsolute, resolve } from 'node:path'
 import glob from 'tiny-glob'
 import MiniSearch from 'minisearch'
 
@@ -39,9 +38,7 @@ export const generate = async options => {
 		cwd,
 		facets,
 		glob: globString,
-		indent,
 		normalizeMetadata,
-		output: outputFilepath,
 		preFilter,
 		processedFilter,
 		searchableFields,
@@ -55,11 +52,6 @@ export const generate = async options => {
 	else if (stopWords) stopWords = [ ...new Set(stopWords) ]
 
 	if (!isAbsolute(contentFolder)) contentFolder = resolve(cwd || currentWorkingDirectory(), contentFolder)
-
-	// TODO move out to CLI tool
-	if (!outputFilepath) throw new Error('Must specify an output filepath.')
-	if (!isAbsolute(outputFilepath)) outputFilepath = resolve(cwd || currentWorkingDirectory(), outputFilepath)
-	await mkdir(dirname(outputFilepath), { recursive: true })
 
 	console.log('Parsing all content files...')
 	const files = await glob(globString, { cwd: contentFolder })
@@ -115,9 +107,7 @@ export const generate = async options => {
 	const miniSearch = new MiniSearch(_minisearchOptions)
 	miniSearch.addAll(chunks)
 
-	// TODO pass back pre-stringify and stringify+write to disk in CLI
-	console.log('Writing data to disk.')
-	await writeFile(outputFilepath, JSON.stringify(pack({
+	return pack({
 		// pass through configs
 		facets,
 		searchableFields,
@@ -131,5 +121,5 @@ export const generate = async options => {
 		// minisearch index
 		miniSearch,
 		_minisearchOptions,
-	}), undefined, indent), 'utf8')
+	})
 }
