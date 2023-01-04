@@ -1,26 +1,3 @@
-/**
- * @typedef {Object} HunchBundleUnpacked
- * @property {Object<String,Map<Any,Array<Number>>>} facets - The first key is the facet name, the next key is the metadata value.
- * @property {Object<String,Number>} chunkIdToFileIndex - The chunk id, e.g. "3:1" to the file ID, e.g. 3.
- * @property {Object} chunkMetadata - The packed metadata of all chunks.
- * @property {Object} fileIdToDocumentIds - Map of file ID, e.g. "3" to DocumentIDs, e.g. [ 7, 8 ], which are the chunks as MiniSearch documents.
- * @property {Object} fileMetadata - The packed metadata of all files.
- * @property {Function} getChunkMetadata - Given a document ID, e.g. "3:1", get the chunk metadata associated with it.
- * @property {Function} getFileMetadata - Given a fileId (a number) return the file metadata or an object.
- * @property {Array<String>} filesList - The list of all filenames.
- * @property {Array<String>} searchableFields - The list of fields available for searching.
- * @property {Object} miniSearch - The generated MiniSearch index.
- * @property {Object} _minisearchOptions - Options to pass to MiniSearch on restore.
- *
- * TODO property {Object} searchableFields
- * TODO property {Object} storedFields
- * TODO property {Object} fileIndexToMetadata
- * TODO property {Object} fileIndexToSearchChunkIndexes
- * TODO property {Object} metadataKeyToMultiValue
- * TODO property {Object} metadataToFileIndexes
- * TODO property {Object} searchChunkIdToChunkMetadata
- */
-
 const unpackTree = (id, packed) => {
 	const recursiveReplacer = obj => {
 		let replace
@@ -42,6 +19,19 @@ const unpackTree = (id, packed) => {
 }
 
 /**
+ * @typedef {Object} HunchBundleUnpacked
+ * @property {Object<String,Number>} chunkIdToFileIndex - The chunk id, e.g. "3:1" to the file ID, e.g. 3.
+ * @property {Object<String,Map<Any,Array<Number>>>} facets - The first key is the facet name, the next key is the metadata value.
+ * @property {Object} fileIdToDocumentIds - Map of file ID, e.g. "3" to DocumentIDs, e.g. [ 7, 8 ], which are the chunks as MiniSearch documents.
+ * @property {Array<String>} filesList - The list of all filenames.
+ * @property {Function} getChunkMetadata - Given a document ID, e.g. "3:1", get the chunk metadata associated with it.
+ * @property {Function} getFileMetadata - Given a fileId (a number) return the file metadata or an object.
+ * @property {Object} miniSearch - The generated MiniSearch index.
+ * @property {Array<String>} searchableFields - The list of fields available for searching.
+ * @property {Object} _minisearchOptions - Options to pass to MiniSearch on restore.
+ */
+
+/**
  * Normalize aka unpack the Hunch bundle.
  * @param {HunchBundlePacked} bundle - The packed Hunch bundle.
  * @return {HunchBundleUnpacked} - The normalized bundle.
@@ -51,7 +41,6 @@ export const unpack = ({
 	facets,
 	searchableFields,
 	stopWords,
-	storedFields,
 	// generated packed data
 	chunkMetadata,
 	fileIdToDocumentIds,
@@ -63,9 +52,7 @@ export const unpack = ({
 }) => {
 	const unpacked = {
 		chunkIdToFileIndex: {},
-		chunkMetadata,
 		fileIdToDocumentIds,
-		fileMetadata,
 		filesList,
 		miniSearch,
 		searchableFields: searchableFields || [],

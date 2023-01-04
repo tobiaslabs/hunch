@@ -1,20 +1,3 @@
-/** @typedef {Object} HunchBundlePacked
- * // pass through configs
- * @property {Object} facets
- * @property {Object} searchableFields
- * @property {Object} stopWords
- * @property {Object} storedFields
- * // generated packed data
- * @property {Object} chunkIdToFileIndex
- * @property {Object} chunkMetadata
- * @property {Object} fileIdToDocumentIds
- * @property {Object} fileMetadata
- * @property {Object} filesList
- * // minisearch related
- * @property {Object} miniSearch
- * @property {Object} _minisearchOptions
- */
-
 const packTree = (initialKeys, initialValues, rootAllowedKeys) => {
 	const keys = initialKeys || []
 	const values = initialValues || []
@@ -52,6 +35,20 @@ const packTree = (initialKeys, initialValues, rootAllowedKeys) => {
 		done: () => ({ keys, values, byId }),
 	}
 }
+/** @typedef {Object} HunchBundlePacked
+ * // pass through configs
+ * @property {Object} facets
+ * @property {Object} searchableFields
+ * @property {Object} stopWords
+ * // generated packed data
+ * @property {Object} chunkMetadata
+ * @property {Object} fileIdToDocumentIds
+ * @property {Object} fileMetadata
+ * @property {Object} filesList
+ * // minisearch related
+ * @property {Object} miniSearch
+ * @property {Object} _minisearchOptions
+ */
 
 /**
  * @return {HunchBundlePacked} The packed bundle.
@@ -75,7 +72,6 @@ export const pack = ({
 		// pass through configs
 		facets,
 		searchableFields,
-		storedFields,
 		filesList,
 		// stringify forces the MiniSearch object to convert to
 		// a normal object for normal traversal

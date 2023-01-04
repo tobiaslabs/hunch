@@ -51,23 +51,13 @@ const filterDocuments = (searchResults, query) => {
 export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSize }) => {
 	const {
 		chunkIdToFileIndex,
-		chunkMetadata,
 		facets,
 		fileIdToDocumentIds,
-		fileMetadata,
 		filesList,
 		getChunkMetadata,
 		getFileMetadata,
-		searchableFields,
-		// storedFields,
-		// fileIndexToMetadata,
-		// fileIndexToSearchChunkIndexes,
-		// metadataKeyToMultiValue,
-		// metadataToFileIndexes,
-		// searchChunkIdToChunkMetadata,
-
-		// minisearch index
 		miniSearch,
+		searchableFields,
 		_minisearchOptions,
 	} = unpack(bundledIndex)
 
