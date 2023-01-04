@@ -1,3 +1,28 @@
+const item1 = {
+	_id: 'file1.md',
+	_score: 0.158,
+	title: 'file1',
+	_chunk: { name: 'markdown', content: '\ncool\n' },
+}
+const item2 = {
+	_id: 'file2.md',
+	_score: 0.158,
+	title: 'file2',
+	_chunk: { name: 'markdown', content: '\ncool\n' },
+}
+const item3 = {
+	_id: 'file3.md',
+	_score: 0.158,
+	title: 'file3',
+	_chunk: { name: 'markdown', content: '\ncool\n' },
+}
+const item4 = {
+	_id: 'file4.md',
+	_score: 0.158,
+	title: 'file4',
+	_chunk: { name: 'markdown', content: '\ncool\n' },
+}
+
 export default (assert, search) => [
 	() => {
 		assert.equal(
@@ -6,9 +31,9 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 0.158, _content: '\ncool\n' },
-					{ _id: 'file2.md', _score: 0.158, _content: '\ncool\n' },
-					{ _id: 'file3.md', _score: 0.158, _content: '\ncool\n' },
+					item1,
+					item2,
+					item3,
 				],
 				page: { items: 4, offset: 0, pages: 2, size: 3 },
 			},
@@ -23,8 +48,8 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 0.158, _content: '\ncool\n' },
-					{ _id: 'file2.md', _score: 0.158, _content: '\ncool\n' },
+					item1,
+					item2,
 				],
 				page: { items: 4, offset: 0, pages: 2, size: 2 },
 			},
@@ -40,8 +65,8 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file3.md', _score: 0.158, _content: '\ncool\n' },
-					{ _id: 'file4.md', _score: 0.158, _content: '\ncool\n' },
+					item3,
+					item4,
 				],
 				page: { items: 4, offset: 1, pages: 2, size: 2 },
 			},
@@ -56,9 +81,9 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 0.158, _content: '\ncool\n' },
-					{ _id: 'file2.md', _score: 0.158, _content: '\ncool\n' },
-					{ _id: 'file3.md', _score: 0.158, _content: '\ncool\n' },
+					item1,
+					item2,
+					item3,
 				],
 				page: { items: 4, offset: 0, pages: 2, size: 3 },
 			},

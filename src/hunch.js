@@ -1,5 +1,7 @@
 import MiniSearch from 'minisearch'
 
+import { unpack } from './utils/unpack.js'
+
 const DEFAULT_PAGE_SIZE = 15
 const EMPTY_RESULTS = {
 	items: [],
@@ -10,22 +12,20 @@ const EMPTY_RESULTS = {
 	},
 }
 
-const shouldExitEarlyForEmptySet = (metadataToFiles, params) => {
-	// TODO add to "boost" tests
-	if (params.boost)
-		for (const key in params.boost)
-			if (!metadataToFiles[key]) return true
-	// TODO add to "facets" tests
-	if (params.facets)
-		for (const key in params.facets)
-			if (!metadataToFiles[key]) return true
-			else if (!params.facets[key].find(f => metadataToFiles[key][f])) return true
+const shouldExitEarlyForEmptySet = ({ query, facets, searchableFields }) => {
+	if (query.boost)
+		for (const key in query.boost)
+			if (!facets[key] && !searchableFields.includes(key)) return true
+	if (query.facetInclude)
+		for (const key in query.facetInclude)
+			if (!facets[key]) return true
+			else if (!query.facetInclude[key].find(f => facets[key].get(f))) return true
 }
 
-const filterDocuments = params => {
-	const include = params.facetInclude || {}
-	const exclude = params.facetExclude || {}
-	return document => {
+const filterDocuments = (searchResults, query) => {
+	const include = query.facetInclude || {}
+	const exclude = query.facetExclude || {}
+	return searchResults.filter(document => {
 		let matches = true
 		for (const name in include) {
 			if (!document[name]) matches = false
@@ -45,88 +45,64 @@ const filterDocuments = params => {
 			}
 		}
 		return matches
-	}
+	})
 }
 
-const generateItemsJsChunks = minisearchIndex => {
-	const chunks = []
-	for (const id in minisearchIndex.storedFields) {
-		const documentId = minisearchIndex.documentIds[id]
-		const { _content, ...metadata } = minisearchIndex.storedFields[id]
-		chunks.push({
-			...metadata,
-			_id: documentId,
-			_content,
-		})
-	}
-	return chunks
-}
-
-const unpack = bundle => {
-	for (const key in (bundle?.index?.storedFields || {})) {
-		bundle.index.storedFields[key]._file = bundle.files[bundle.index.storedFields[key]._file]
-	}
-	bundle.chunks = generateItemsJsChunks(bundle.index)
-	bundle.fileIdToIndex = {}
-	let index = 0
-	for (const fileId of bundle.files) bundle.fileIdToIndex[fileId] = index++
-	return bundle
-}
-
-export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords, maxPageSize }) => {
+export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSize }) => {
 	const {
+		chunkIdToFileIndex,
+		chunkMetadata,
 		facets,
-		chunks,
-		fileIdToIndex,
-		index: miniSearchIndex,
-		metadata,
-		metadataToFiles,
+		fileIdToDocumentIds,
+		fileMetadata,
+		filesList,
+		getChunkMetadata,
+		getFileMetadata,
 		searchableFields,
-		storedFieldKeys,
-		storedFields,
+		// storedFields,
+		// fileIndexToMetadata,
+		// fileIndexToSearchChunkIndexes,
+		// metadataKeyToMultiValue,
+		// metadataToFileIndexes,
+		// searchChunkIdToChunkMetadata,
+
+		// minisearch index
+		miniSearch,
+		_minisearchOptions,
 	} = unpack(bundledIndex)
 
 	let mini
-	const init = () => {
-		const fields = [
-			...new Set([
-				...(searchableFields || []),
-				...(facets || []),
-				'_file',
-				'_content',
-			]),
-		]
-		if (stopWords && Array.isArray(stopWords)) stopWords = new Set(stopWords)
-		mini = MiniSearch.loadJS(miniSearchIndex, {
-			idField: '_id',
-			fields,
-			storeFields: fields,
-			...(
-				typeof stopWords?.has === 'function'
-					? { processTerm: term => stopWords.has(term) ? null : term.toLowerCase() }
-					: {}
-			),
-		})
-	}
+	const init = () => mini = MiniSearch.loadJS(miniSearch, _minisearchOptions)
 
 	return query => {
 		// If for example you specify `facet[tags]=cats` and there are no documents
 		// containing that tag, we can just short circuit and exit early.
-		if (shouldExitEarlyForEmptySet(metadataToFiles, query)) return EMPTY_RESULTS
+		if (shouldExitEarlyForEmptySet({ query, facets, searchableFields })) return EMPTY_RESULTS
 
-		// TODO should support request document by id (filename)???
+		if (query.id) {
+			let item = null
+			const fileId = filesList.indexOf(query.id)
+			const documentIds = fileIdToDocumentIds[fileId]
+			if (documentIds) {
+				const chunks = []
+				for (const id of documentIds) chunks.push({
+					...getChunkMetadata(miniSearch.documentIds[id]),
+					content: miniSearch.storedFields[id].content,
+				})
+				if (chunks.length) item = {
+					...getFileMetadata(fileId),
+					_id: query.id,
+					_chunks: chunks,
+				}
+			}
+			return { item }
+		}
 
 		let searchResults = []
-		if (!query.q && !query.suggest) {
-			for (const documentId in miniSearchIndex.storedFields) {
-				const item = { ...miniSearchIndex.storedFields[documentId] }
-				item.id = miniSearchIndex.documentIds[documentId]
-				item.score = 0
-				searchResults.push(item)
-			}
-		} else {
-			if (!mini) init()
-			if (query.suggest) return {
+
+		if (!mini && (query.q || query.suggest)) init()
+		if (query.suggest) {
+			return {
 				suggestions: mini
 					.autoSuggest(query.q || '')
 					.map(({ suggestion: q, score }) => ({
@@ -134,15 +110,22 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords,
 						score: Math.round(score * 1000) / 1000,
 					})),
 			}
-			if (query.q) {
-				const miniOptions = {}
-				if (query.facetInclude || query.facetExclude) miniOptions.filter = filterDocuments(query)
-				// These few properties are named exactly the same as
-				// the MiniSearch properties, so we can direct copy.
-				for (const key of [ 'boost', 'fields', 'fuzzy', 'prefix' ]) if (query[key]) miniOptions[key] = query[key]
-				searchResults = mini.search(query.q, miniOptions)
+		} else if (query.q) {
+			const miniOptions = {}
+			// These few properties are named exactly the same as
+			// the MiniSearch properties, so we can direct copy.
+			for (const key of [ 'boost', 'fields', 'fuzzy', 'prefix' ]) if (query[key]) miniOptions[key] = query[key]
+			searchResults = mini.search(query.q, miniOptions)
+		} else {
+			// loading *all* documents, but only the first chunk
+			for (const documentId in miniSearch.documentIds) {
+				searchResults.push({
+					...miniSearch.storedFields[documentId],
+					id: miniSearch.documentIds[documentId],
+				})
 			}
 		}
+
 		if (!searchResults.length) return EMPTY_RESULTS
 
 		// The results from MiniSearch may match more than one chunk, and if that happens we
@@ -158,14 +141,31 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords,
 		const parentIdToChunkId = {}
 		const chunkIdToKeep = {}
 		for (const result of searchResults) {
-			const id = result.id.split(':')[0]
+			const id = chunkIdToFileIndex[result.id]
 			// for MiniSearch, the first one is the highest scoring, so we just always grab that one
 			if (!parentIdToChunkId[id]) {
 				parentIdToChunkId[id] = true
 				chunkIdToKeep[result.id] = true
 			}
 		}
-		searchResults = searchResults.filter(r => chunkIdToKeep[r.id])
+		searchResults = searchResults
+			.filter(r => chunkIdToKeep[r.id])
+			.map(({ terms: ignore1, match: ignore2, id, score, content, ...props }) => {
+				const metadata = getFileMetadata(chunkIdToFileIndex[id])
+				if (score) metadata._score = Math.round(score * 1000) / 1000
+				return {
+					...props,
+					...metadata,
+					_id: filesList[chunkIdToFileIndex[id]],
+					_chunk: {
+						...(getChunkMetadata(id) || {}),
+						content,
+					},
+				}
+			})
+
+		if (query.facetInclude || query.facetExclude) searchResults = filterDocuments(searchResults, query)
+
 		if (prePaginationSort) searchResults = prePaginationSort({ items: searchResults, query })
 
 		let size = query.pageSize === undefined || query.pageSize < 0
@@ -185,28 +185,27 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, stopWords,
 					size,
 				},
 		}
-		if (facets?.length) {
-			out.facets = {}
-			for (const f of facets) out.facets[f] = {}
+		const addToFacets = (facet, key) => {
+			out.facets = out.facets || {}
+			out.facets[facet] = out.facets[facet] || {}
+			out.facets[facet][key] = (out.facets[facet][key] || 0) + 1
 		}
-		const addToFacets = (facet, key) => out.facets[facet][key] = (out.facets[facet][key] || 0) + 1
 
 		const start = size * out.page.offset // e.g. pageOffset = 3, start = 10*3 = 30
 		const end = start + size // e.g. 30+10 = 40
 		let index = 0
-		for (const { _file, score, id: ignore1, terms: ignore2, match: ignore3, ...props } of searchResults) {
-			if (facets?.length) for (const f of facets) if (props[f]) {
-				if (Array.isArray(props[f])) for (const p of props[f]) addToFacets(f, p)
-				else addToFacets(f, props[f])
-			}
-			if (index >= start && index < end) out.items.push({ _id: _file, _score: Math.round(score * 1000) / 1000, ...props })
+		const facetNames = Object.keys(facets)
+		for (let item of searchResults) {
+			if (facetNames?.length)
+				for (const f of facetNames)
+					if (item[f]) {
+						if (Array.isArray(item[f])) for (const p of item[f]) addToFacets(f, p)
+						else addToFacets(f, item[f])
+					}
+			if (index >= start && index < end)
+				out.items.push(item)
 			index++
 		}
-
-		if (storedFieldKeys?.length)
-			for (const item of out.items)
-				for (const key of storedFieldKeys)
-					if (storedFields[fileIdToIndex[item._id]]?.[key]) item[key] = storedFields[fileIdToIndex[item._id]][key]
 
 		return out
 	}

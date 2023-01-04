@@ -6,8 +6,20 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 0.3, _content: '\ncool\n', series: 'bbb' },
-					{ _id: 'file2.md', _score: 0.253, _content: '\ncool and curious\n', series: 'aaa' },
+					{
+						_id: 'file1.md',
+						_score: 0.3,
+						series: 'bbb',
+						title: 'file1',
+						_chunk: { name: 'markdown', content: '\ncool\n' },
+					},
+					{
+						_id: 'file2.md',
+						_score: 0.253,
+						title: 'file2',
+						series: 'aaa',
+						_chunk: { name: 'markdown', content: '\ncool and curious\n' },
+					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
 				facets: {
@@ -28,8 +40,20 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file2.md', _score: 0.253, _content: '\ncool and curious\n', series: 'aaa' },
-					{ _id: 'file1.md', _score: 0.3, _content: '\ncool\n', series: 'bbb' },
+					{
+						_id: 'file2.md',
+						_score: 0.253,
+						title: 'file2',
+						series: 'aaa',
+						_chunk: { name: 'markdown', content: '\ncool and curious\n' },
+					},
+					{
+						_id: 'file1.md',
+						_score: 0.3,
+						series: 'bbb',
+						title: 'file1',
+						_chunk: { name: 'markdown', content: '\ncool\n' },
+					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
 				facets: {

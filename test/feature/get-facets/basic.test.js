@@ -29,7 +29,17 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 0, _content: '\nwords in file1\n', series: 'Animals', tags: [ 'cats', 'dogs' ], published: '2022-12-20' },
+					{
+						_id: 'file1.md',
+						title: 'file1',
+						series: 'Animals',
+						tags: [ 'cats', 'dogs' ],
+						published: '2022-12-20',
+						_chunk: {
+							name: 'markdown',
+							content: '\nwords in file1\n',
+						},
+					},
 				],
 				page: { items: 4, offset: 0, pages: 4, size: 1 },
 				facets: {

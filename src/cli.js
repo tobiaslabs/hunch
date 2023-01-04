@@ -29,6 +29,7 @@ cli
 		import(config)
 			.then(({ default: opts }) => generate({ ...opts, cwd }))
 			.then(() => {
+				// TODO write to disk here, not in the `generate`
 				console.log(`Hunch completed in ${humanTime(Date.now() - start)}.`)
 			})
 	})

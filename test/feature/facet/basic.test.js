@@ -7,10 +7,22 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 0.158, _content: '\nwords in file1\n', tags: [ 'cats', 'dogs' ] },
-					{ _id: 'file2.md', _score: 0.158, _content: '\nwords in file2\n', tags: [ 'cats' ] },
+					{
+						_id: 'file1.md',
+						_score: 0.158,
+						tags: [ 'cats', 'dogs' ],
+						title: 'file1',
+						_chunk: { name: 'markdown', content: '\nwords in file1\n' },
+					},
+					{
+						_id: 'file2.md',
+						_score: 0.158,
+						tags: [ 'cats' ],
+						title: 'file2',
+						_chunk: { name: 'markdown', content: '\nwords in file2\n' },
+					},
 				],
-				page: { offset: 0, size: 15, pages: 1, items: 2 },
+				page: { items: 2, offset: 0, pages: 1, size: 15 },
 				facets: {
 					tags: {
 						dogs: 1,
@@ -30,14 +42,33 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file2.md', _score: 0.158, _content: '\nwords in file2\n', tags: [ 'cats' ] },
+					{
+						_id: 'file2.md',
+						_score: 0.158,
+						tags: [ 'cats' ],
+						title: 'file2',
+						_chunk: { name: 'markdown', content: '\nwords in file2\n' },
+					},
 				],
-				page: { offset: 0, size: 15, pages: 1, items: 1 },
+				page: { items: 1, offset: 0, pages: 1, size: 15 },
 				facets: {
 					tags: {
 						cats: 1,
 					},
 				},
+			},
+			'only one files has cats and NOT dogs',
+		)
+	},
+	() => {
+		assert.equal(
+			search({
+				q: 'words',
+				facetInclude: { field_that_does_not_exist: [ 'yolo' ] },
+			}),
+			{
+				items: [],
+				page: { items: 0, offset: 0, pages: 0 },
 			},
 			'only one files has cats and NOT dogs',
 		)

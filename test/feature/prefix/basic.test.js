@@ -19,8 +19,18 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 0.334, _content: '\nmotocross\n' },
-					{ _id: 'file2.md', _score: 0.33, _content: '\nmotorcycle\n' },
+					{
+						_id: 'file1.md',
+						_score: 0.334,
+						title: 'file1',
+						_chunk: { name: 'markdown', content: '\nmotocross\n' },
+					},
+					{
+						_id: 'file2.md',
+						_score: 0.33,
+						title: 'file2',
+						_chunk: { name: 'markdown', content: '\nmotorcycle\n' },
+					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
 			},

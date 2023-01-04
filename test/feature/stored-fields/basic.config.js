@@ -1,4 +1,4 @@
 export default {
 	facets: [ 'tags' ],
-	storedFields: [ 'podcastId' ],
+	storedFields: [ 'podcastId', 'started' ],
 }

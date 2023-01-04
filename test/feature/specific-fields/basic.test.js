@@ -6,8 +6,18 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 1.04, _content: '\ncurious\n', description: 'cool' },
-					{ _id: 'file2.md', _score: 1.04, _content: '\ncool\n', description: 'curious' },
+					{
+						_id: 'file2.md',
+						_score: 1.04,
+						description: 'curious',
+						_chunk: { name: 'markdown', content: '\ncool\n' },
+					},
+					{
+						_id: 'file1.md',
+						_score: 1.04,
+						description: 'cool',
+						_chunk: { name: 'markdown', content: '\ncurious\n' },
+					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
 			},
@@ -22,7 +32,12 @@ export default (assert, search) => [
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 1.04, _content: '\ncurious\n', description: 'cool' },
+					{
+						_id: 'file1.md',
+						_score: 1.04,
+						description: 'cool',
+						_chunk: { name: 'markdown', content: '\ncurious\n' },
+					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 1 },
 			},
@@ -33,12 +48,22 @@ export default (assert, search) => [
 		assert.equal(
 			search({
 				q: 'cool',
-				fields: [ 'description', '_content' ],
+				fields: [ 'description', 'content' ],
 			}),
 			{
 				items: [
-					{ _id: 'file1.md', _score: 1.04, _content: '\ncurious\n', description: 'cool' },
-					{ _id: 'file2.md', _score: 1.04, _content: '\ncool\n', description: 'curious' },
+					{
+						_id: 'file1.md',
+						_score: 1.04,
+						description: 'cool',
+						_chunk: { name: 'markdown', content: '\ncurious\n' },
+					},
+					{
+						_id: 'file2.md',
+						_score: 1.04,
+						description: 'curious',
+						_chunk: { name: 'markdown', content: '\ncool\n' },
+					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
 			},
