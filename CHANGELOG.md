@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0
+
+### Minor Changes
+
+- 1965433: Add a CLI to run HunchJS from the command line.
+- b09cd39: Refactor the generator so file writing is part of the CLI, not core to the generator.
+
 ## 0.0.5
 
 ### Patch Changes
