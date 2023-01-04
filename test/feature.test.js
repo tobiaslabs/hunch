@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { readdir, readFile } from 'node:fs/promises'
+import { readdir } from 'node:fs/promises'
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 
@@ -10,23 +10,28 @@ const CWD = process.cwd()
 
 const features = [
 	'boost',
+	'by-id',
 	'facet',
 	'full-text-lookup',
 	'fuzzy-search',
+	'get-facets',
 	'pagination',
 	'prefix',
 	'score',
 	'sort',
 	'specific-fields',
 	'stop-words',
+	'stored-fields',
 	'suggest',
 ]
+
+const verbose = process.argv.includes('--verbose')
 
 const original = {}
 const silence = () => {
 	for (const level in console) {
 		original[level] = console[level]
-		console[level] = _ => _
+		if (!verbose) console[level] = _ => _
 	}
 	return () => { for (const level in console) console[level] = original[level] }
 }
@@ -47,14 +52,13 @@ for (const feature of features) {
 		log('  -', conf)
 		const { default: options, setup } = await import(`./feature/${feature}/${conf}.config.js`)
 		options.cwd = join(CWD, 'test', 'feature', feature)
-		options.indent = '\t'
 		options.input = `./content-${conf}`
-		options.output = `./build/${conf}.json`
-		await generate(options)
+		options.searchableFields = options.searchableFields || [ 'description', 'title' ]
+		if (verbose) options.verbose = true
 		testTree[feature][conf] = {
 			search: hunch({
 				...(setup || {}),
-				index: JSON.parse(await readFile(`./test/feature/${feature}/build/${conf}.json`, 'utf8')),
+				index: await generate(options),
 			}),
 			runner: await import(`./feature/${feature}/${conf}.test.js`).then(i => i.default),
 		}

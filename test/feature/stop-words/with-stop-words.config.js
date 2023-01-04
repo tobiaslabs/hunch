@@ -1,5 +1,3 @@
-export default {}
-
-export const setup = {
+export default {
 	stopWords: [ 'and' ],
 }
