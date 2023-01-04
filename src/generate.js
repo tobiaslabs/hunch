@@ -13,23 +13,9 @@ const DEFAULT_OPTIONS = {
 	normalizeMetadata: _ => _,
 	preFilter: file => !file.endsWith('.DS_Store'),
 	processedFilter: ({ metadata }) => metadata.published !== false && (!metadata.published?.getTime || metadata.published.getTime() > Date.now()),
-	// TODO document these defaults
-	facets: [
-		'tags',
-		'tag',
-		'categories',
-		'category',
-	],
-	searchableFields: [
-		'content',
-		'description',
-		'summary',
-		'title',
-	],
-	storedFields: [
-		'published',
-		'updated',
-	],
+	facets: [],
+	searchableFields: [],
+	storedFields: [],
 }
 
 export const generate = async options => {

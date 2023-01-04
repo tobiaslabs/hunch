@@ -2,4 +2,4 @@
 "hunch": minor
 ---
 
-add cli to run hunch
+Add a CLI to run HunchJS from the command line.

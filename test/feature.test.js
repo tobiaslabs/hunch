@@ -53,6 +53,7 @@ for (const feature of features) {
 		const { default: options, setup } = await import(`./feature/${feature}/${conf}.config.js`)
 		options.cwd = join(CWD, 'test', 'feature', feature)
 		options.input = `./content-${conf}`
+		options.searchableFields = options.searchableFields || [ 'description', 'title' ]
 		if (verbose) options.verbose = true
 		testTree[feature][conf] = {
 			search: hunch({
