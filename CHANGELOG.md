@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+### Patch Changes
+
+- ded3b8f: Point the CLI back to the dist folder. 🤦‍♂️
+
 ## 0.1.1
 
 ### Patch Changes
