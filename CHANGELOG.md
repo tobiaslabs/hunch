@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 1680508: The metadata normalization function can be asynchronously called, and is called with an object containing the metadata and blocks list.
+- 34c409a: The CLI configuration was incorrect in pointing to a CommonJS file. This has been fixed, and some additional logging details were added.
+
 ## 0.1.0
 
 ### Minor Changes
