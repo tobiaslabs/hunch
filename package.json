@@ -1,6 +1,6 @@
 {
   "name": "hunch",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Compiled search for your static Markdown files.",
   "type": "module",
   "module": "dist/index.js",
