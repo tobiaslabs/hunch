@@ -5,7 +5,7 @@
   "type": "module",
   "module": "dist/index.js",
   "main": "dist/index.cjs",
-  "bin": "bin.cjs",
+  "bin": "bin.js",
   "exports": {
     ".": {
       "import": "./dist/index.js",

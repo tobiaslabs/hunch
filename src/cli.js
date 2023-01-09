@@ -3,11 +3,16 @@ import { dirname, resolve, isAbsolute } from 'node:path'
 import sade from 'sade'
 import { generate } from './generate.js'
 
+// numbers picked to look approximately nice enough
 const humanTime = millis => {
-	// numbers picked to look nice-enough
 	if (millis < 1_000) return `${millis} milliseconds`
 	if (millis < 120_000) return `${Math.round(millis / 100) / 10} seconds` // 113_456 => '113.5' seconds
 	else return `${Math.round(millis / 6000) / 10} minutes` // 4_567_890 => '76.1 minutes'
+}
+const humanBytes = bytes => {
+	if (bytes < 2_000) return `${bytes} bytes`
+	if (bytes < 600_000) return `${Math.round(bytes / 100) / 10} KB`
+	else return `${Math.round(bytes / 100_000) / 10} MB`
 }
 
 const cli = sade('hunch', true)
@@ -20,9 +25,10 @@ const run = async ({ config, cwd, indent, verbose }) => {
 	if (!isAbsolute(outputFilepath)) outputFilepath = resolve(cwd, outputFilepath)
 	await mkdir(dirname(outputFilepath), { recursive: true })
 
-	const outputData = generate({ ...opts, cwd, verbose })
-	console.log('Writing data to disk.')
-	await writeFile(outputFilepath, JSON.stringify(outputData, undefined, indent ? '\t' : ''), 'utf8')
+	const outputData = await generate({ ...opts, cwd, verbose })
+	const string = JSON.stringify(outputData, undefined, indent ? '\t' : '')
+	console.log('Index file size:', humanBytes(new TextEncoder().encode(string).length))
+	await writeFile(outputFilepath, string, 'utf8')
 }
 
 cli

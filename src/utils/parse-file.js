@@ -8,8 +8,8 @@ export const parseFile = async ({ contentFolder: absoluteRootFilepath, file: rel
 	if (string) {
 		const { blocks } = parse(string)
 		let metadata = [ 'yaml', 'frontmatter' ].includes(blocks?.[0]?.name) && load(blocks[0].content, { schema: JSON_SCHEMA })
-		if (metadata) metadata = normalizeMetadata(metadata)
 		if (blocks?.length > 1) blocks.shift()
+		if (metadata && normalizeMetadata) metadata = await normalizeMetadata({ metadata, blocks })
 		return { metadata, file: relativeFilepath, blocks }
 	}
 }

@@ -30,8 +30,8 @@ export default [
 		input: 'src/cli.js',
 		output: [
 			{
-				format: 'cjs',
-				file: 'dist/cli.cjs',
+				format: 'es',
+				file: 'dist/cli.js',
 			},
 		],
 		external: normal.map(name => `./${name}.js`),

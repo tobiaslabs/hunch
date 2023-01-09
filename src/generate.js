@@ -10,7 +10,6 @@ import { parseFile } from './utils/parse-file.js'
 const DEFAULT_OPTIONS = {
 	glob: '**/*.md',
 	indent: null,
-	normalizeMetadata: _ => _,
 	preFilter: file => !file.endsWith('.DS_Store'),
 	processedFilter: ({ metadata }) => metadata.published !== false && (!metadata.published?.getTime || metadata.published.getTime() > Date.now()),
 	facets: [],
