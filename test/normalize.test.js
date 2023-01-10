@@ -33,6 +33,10 @@ test('normalize query parameters', () => {
 		/The parameter "page\[offset]" must be a positive integer./,
 	)
 	assert.throws(
+		() => normalize({ 'snippet[content]': '-3' }),
+		/The parameter "snippet\[content]" must be a positive integer./,
+	)
+	assert.throws(
 		() => normalize({ 'prefix': 'yes' }),
 		/The parameter "prefix" must only be "true" or "false"./,
 	)
@@ -66,7 +70,7 @@ test('normalize query parameters', () => {
 			{ q: 'exact words' },
 		],
 		[
-			'',
+			'fuzzy search',
 			{ fuzzy: '0.8' },
 			{ fuzzy: 0.8 },
 		],
@@ -79,6 +83,11 @@ test('normalize query parameters', () => {
 			'prefix',
 			{ prefix: 'true' },
 			{ prefix: true },
+		],
+		[
+			'snippet size',
+			{ 'snippet[content]': '50' },
+			{ snippet: { content: 50 } },
 		],
 		[
 			'specific fields',

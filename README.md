@@ -8,6 +8,7 @@ Hunch supports these search features:
 
 - Full text lookup [docs](https://hunchjs.com/docs/searching#full-text-lookup)
 - Fuzzy search [docs](https://hunchjs.com/docs/searching#fuzzy-search)
+- Return only partial snippet [docs](https://hunchjs.com/docs/searching#snippet)
 - Search specific fields [docs](https://hunchjs.com/docs/searching#specific-fields)
 - Prefix search [docs](https://hunchjs.com/docs/searching#prefix)
 - Search suggestions [docs](https://hunchjs.com/docs/searching#suggest)

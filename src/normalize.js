@@ -72,6 +72,9 @@ export const normalize = params => {
 			parsed.boost = parsed.boost || {}
 			parsed.boost[child] = parseFloat(params[key])
 			if (Number.isNaN(parsed.boost[child]) || parsed.boost[child] < 1) throw new Error(`The parameter "${key}" must be a valid float greater than 1.`)
+		} else if (parent === 'snippet') {
+			parsed.snippet = parsed.snippet || {}
+			parsed.snippet[child] = castToPositiveInt(params, key)
 		} else if (parent === 'facets') {
 			const values = castToUniqueStrings(params[key])
 			for (const val of values) {
