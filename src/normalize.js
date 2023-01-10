@@ -24,6 +24,7 @@ const castToUniqueStrings = string => ([
 /**
  * @typedef {Object} QueryParameters
  * @param {string} [q] - The text to search for.
+ * @param {string} [id] - The identifier of the document.
  * @param {number} [fuzzy] - The fuzziness of the main query parameter. (Float. Default: none.)
  * @param {boolean} [prefix] - Whether to use the query string as a prefix.
  * @param {boolean} [suggest] - Whether to use the query string to suggest other search queries.
@@ -50,6 +51,7 @@ export const normalize = params => {
 	const parsed = {}
 
 	if (params.q) parsed.q = params.q
+	if (params.id) parsed.id = params.id
 
 	if (params.fuzzy) parsed.fuzzy = parseFloat(params.fuzzy)
 	if (parsed.fuzzy < 0) throw new Error('The parameter "fuzzy" must be a positive number.')
@@ -61,8 +63,8 @@ export const normalize = params => {
 
 	if (params.sort !== undefined) parsed.sort = params.sort
 
-	if (params['page[offset]']) parsed.pageOffset = castToPositiveInt(params['page[offset]'])
-	if (params['page[size]']) parsed.pageSize = castToPositiveInt(params['page[size]'])
+	if (params['page[offset]']) parsed.pageOffset = castToPositiveInt(params, 'page[offset]')
+	if (params['page[size]']) parsed.pageSize = castToPositiveInt(params, 'page[size]')
 
 	for (const key in params) {
 		const [ , parent, child ] = (key.endsWith(']') && BRACKETED_QUERY_PARAM.exec(key)) || []
