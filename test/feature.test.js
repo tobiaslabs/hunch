@@ -18,6 +18,7 @@ const features = [
 	'pagination',
 	'prefix',
 	'score',
+	'snippet',
 	'sort',
 	'specific-fields',
 	'stop-words',
