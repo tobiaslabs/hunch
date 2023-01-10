@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- e5a8580: Add functionality to support "snippet" searching, e.g. return partial documents.
+
+### Patch Changes
+
+- 946c1c0: Add testing for query parameter normalization and fix by-id and pagination errors in normalization.
+
 ## 0.1.2
 
 ### Patch Changes
