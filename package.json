@@ -27,9 +27,9 @@
   },
   "scripts": {
     "changeset": "changeset",
-    "test": "npm run test:lint && npm run test:feature && npm run test:normalize",
+    "test": "npm run test:lint && npm run test:feature && npm run test:functions",
     "test:feature": "node test/feature.test.js",
-    "test:normalize": "node test/normalize.test.js",
+    "test:functions": "uvu test test.js -i feature",
     "test:lint": "eslint *.js",
     "build": "rollup -c",
     "demo": "cd demo && rm -rf build && node demo.test.js",
