@@ -14,6 +14,7 @@ export const toQuery = query => {
 	if (query.id) out.id = query.id.toString()
 	if (query.pageSize !== undefined) out['page[size]'] = query.pageSize.toString()
 	if (query.pageOffset !== undefined) out['page[offset]'] = query.pageOffset.toString()
+	if (query.sort !== undefined) out.sort = query.sort.toString()
 	if (query.prefix) out.prefix = 'true'
 	if (query.suggest) out.suggest = 'true'
 	if (query.fields?.length) out.fields = query.fields.join(',')

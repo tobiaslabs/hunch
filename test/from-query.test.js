@@ -23,18 +23,28 @@ test('turn query parameters into a hunch query', () => {
 			facetExclude: { tags: [ 'dogs' ] },
 		},
 	)
+	assert.equal(
+		fromQuery({ sort: 'anything' }),
+		{ sort: 'anything' },
+		'the sort property is passed along',
+	)
+	assert.equal(
+		fromQuery({ sort: 3 }),
+		{ sort: 3 },
+		'it is untouched so your earlier changes will stick around',
+	)
 
 	assert.throws(
 		() => fromQuery({ 'page[size]': '-3' }),
-		/The parameter "page\[size]" must be a positive integer./,
+		/The parameter "page\[size]" must be an integer greater or equal to zero/,
 	)
 	assert.throws(
 		() => fromQuery({ 'page[offset]': '-3' }),
-		/The parameter "page\[offset]" must be a positive integer./,
+		/The parameter "page\[offset]" must be an integer greater or equal to zero/,
 	)
 	assert.throws(
 		() => fromQuery({ 'snippet[content]': '-3' }),
-		/The parameter "snippet\[content]" must be a positive integer./,
+		/The parameter "snippet\[content]" must be an integer greater or equal to zero/,
 	)
 	assert.throws(
 		() => fromQuery({ 'prefix': 'yes' }),
