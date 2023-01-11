@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+### Patch Changes
+
+- 6fe9f33: Passing 0 to pagination and snippet size is allowed and supported.
+
 ## 0.3.0
 
 ### Minor Changes
