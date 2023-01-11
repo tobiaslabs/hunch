@@ -6,9 +6,10 @@ import resolve from '@rollup/plugin-node-resolve'
 const { version } = JSON.parse(await readFile('./package.json', 'utf8'))
 
 const normal = [
+	'from-query',
 	'generate',
 	'hunch',
-	'normalize',
+	'to-query',
 ]
 
 export default [
