@@ -21,6 +21,16 @@ test('turn query parameters into a hunch query', () => {
 			'facets[tags]': 'cats,-dogs',
 		}),
 	)
+	assert.equal(
+		toQuery({ sort: 'only strings' }),
+		toString({ sort: 'only strings' }),
+		'the sort is passed along as well',
+	)
+	assert.equal(
+		toQuery({ sort: { foo: 3 } }),
+		toString({ sort: '[object Object]' }),
+		'the toString() is called to cast',
+	)
 
 	const testEveryProperty = [
 		[
