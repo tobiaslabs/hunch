@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- 2371232: Change the query normalization name, but also add a helper function to turn a HunchJS query object into a query search string.
+
+  What you'll need to do to update:
+
+  ### Change imports
+
+  ```js
+  import { normalize } from "hunch";
+  // =>
+  import { fromQuery } from "hunch";
+  ```
+
+  ```js
+  import { normalize } from "hunch/normalize";
+  // =>
+  import { fromQuery } from "hunch/from-query";
+  ```
+
+### Patch Changes
+
+- 90a3be4: Refactor pagination to make it testable, then add tests and optimize.
+
 ## 0.2.0
 
 ### Minor Changes
