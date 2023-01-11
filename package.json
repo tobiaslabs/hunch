@@ -11,6 +11,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./from-query": {
+      "import": "./dist/from-query.js",
+      "require": "./dist/from-query.cjs"
+    },
     "./generate": {
       "import": "./dist/generate.js",
       "require": "./dist/generate.cjs"
@@ -19,9 +23,9 @@
       "import": "./dist/hunch.js",
       "require": "./dist/hunch.cjs"
     },
-    "./normalize": {
-      "import": "./dist/normalize.js",
-      "require": "./dist/normalize.cjs"
+    "./to-query": {
+      "import": "./dist/to-query.js",
+      "require": "./dist/to-query.cjs"
     },
     "./package.json": "./package.json"
   },

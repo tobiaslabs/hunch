@@ -1,11 +1,11 @@
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 
-import { normalize } from '../src/normalize.js'
+import { fromQuery } from '../src/from-query.js'
 
-test('normalize query parameters', () => {
+test('turn query parameters into a hunch query', () => {
 	assert.equal(
-		normalize({
+		fromQuery({
 			q: 'foo',
 			'facets[tags]': 'cats,-dogs',
 		}),
@@ -16,7 +16,7 @@ test('normalize query parameters', () => {
 		},
 	)
 	assert.equal(
-		normalize(new URL(`https://site.com?q=foo&${encodeURIComponent('facets[tags]')}=${encodeURIComponent('cats,-dogs')}`).searchParams),
+		fromQuery(new URL(`https://site.com?q=foo&${encodeURIComponent('facets[tags]')}=${encodeURIComponent('cats,-dogs')}`).searchParams),
 		{
 			q: 'foo',
 			facetInclude: { tags: [ 'cats' ] },
@@ -25,23 +25,23 @@ test('normalize query parameters', () => {
 	)
 
 	assert.throws(
-		() => normalize({ 'page[size]': '-3' }),
+		() => fromQuery({ 'page[size]': '-3' }),
 		/The parameter "page\[size]" must be a positive integer./,
 	)
 	assert.throws(
-		() => normalize({ 'page[offset]': '-3' }),
+		() => fromQuery({ 'page[offset]': '-3' }),
 		/The parameter "page\[offset]" must be a positive integer./,
 	)
 	assert.throws(
-		() => normalize({ 'snippet[content]': '-3' }),
+		() => fromQuery({ 'snippet[content]': '-3' }),
 		/The parameter "snippet\[content]" must be a positive integer./,
 	)
 	assert.throws(
-		() => normalize({ 'prefix': 'yes' }),
+		() => fromQuery({ 'prefix': 'yes' }),
 		/The parameter "prefix" must only be "true" or "false"./,
 	)
 	assert.throws(
-		() => normalize({ 'suggest': 'yes' }),
+		() => fromQuery({ 'suggest': 'yes' }),
 		/The parameter "suggest" must only be "true" or "false"./,
 	)
 
@@ -101,7 +101,7 @@ test('normalize query parameters', () => {
 		],
 	]
 	for (const [ label, query, expected ] of testEveryProperty)
-		assert.equal(normalize(query), expected, label)
+		assert.equal(fromQuery(query), expected, label)
 })
 
 test.run()

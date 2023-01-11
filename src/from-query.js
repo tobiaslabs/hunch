@@ -41,10 +41,10 @@ const castToUniqueStrings = string => ([
  * Given a query parameter object (for example a `URLSearchParams` object), return a
  * normalized set of query parameters for use by the Hunch engine.
  *
- * @param {any} params - The query parameters.
+ * @param {URLSearchParams|Object} params - The query parameters.
  * @return {QueryParameters} - The normalized parameters.
  */
-export const normalize = params => {
+export const fromQuery = params => {
 	params = params || {}
 	if (params instanceof URLSearchParams) params = castToObject(params)
 

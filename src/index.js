@@ -1,3 +1,4 @@
 export { generate } from './generate.js'
 export { hunch } from './hunch.js'
-export { normalize } from './normalize.js'
+export { fromQuery } from './from-query.js'
+export { toQuery } from './to-query.js'
