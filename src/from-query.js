@@ -6,9 +6,9 @@ const castToObject = p => {
 	return obj
 }
 
-const castToPositiveInt = (params, key) => {
+const castToInt = (params, key) => {
 	const value = parseInt(params[key], 10)
-	if (Number.isNaN(value) || value <= 0) throw new Error(`The parameter "${key}" must be a positive integer.`)
+	if (Number.isNaN(value) || value < 0) throw new Error(`The parameter "${key}" must be an integer greater or equal to zero.`)
 	return value
 }
 
@@ -63,8 +63,8 @@ export const fromQuery = params => {
 
 	if (params.sort !== undefined) parsed.sort = params.sort
 
-	if (params['page[offset]']) parsed.pageOffset = castToPositiveInt(params, 'page[offset]')
-	if (params['page[size]']) parsed.pageSize = castToPositiveInt(params, 'page[size]')
+	if (params['page[offset]']) parsed.pageOffset = castToInt(params, 'page[offset]')
+	if (params['page[size]']) parsed.pageSize = castToInt(params, 'page[size]')
 
 	for (const key in params) {
 		const [ , parent, child ] = (key.endsWith(']') && BRACKETED_QUERY_PARAM.exec(key)) || []
@@ -74,7 +74,7 @@ export const fromQuery = params => {
 			if (Number.isNaN(parsed.boost[child]) || parsed.boost[child] < 1) throw new Error(`The parameter "${key}" must be a valid float greater than 1.`)
 		} else if (parent === 'snippet') {
 			parsed.snippet = parsed.snippet || {}
-			parsed.snippet[child] = castToPositiveInt(params, key)
+			parsed.snippet[child] = castToInt(params, key)
 		} else if (parent === 'facets') {
 			const values = castToUniqueStrings(params[key])
 			for (const val of values) {

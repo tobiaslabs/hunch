@@ -22,6 +22,26 @@ export default (assert, search) => [
 	() => {
 		assert.equal(
 			search({
+				q: 'which is crooked',
+				snippet: { content: 0 },
+			}),
+			{
+				items: [
+					{
+						_id: 'file1.md',
+						_score: 5.752,
+						title: 'Ecclesiastes',
+						_chunk: { name: 'markdown', content: '' },
+					},
+				],
+				page: { offset: 0, size: 15, pages: 1, items: 1 },
+			},
+			'if snippet size is zero the chunk returns but content is empty string',
+		)
+	},
+	() => {
+		assert.equal(
+			search({
 				q: 'heart',
 				snippet: { content: 15 },
 			}).items[0]._chunk.content,
