@@ -1,8 +1,8 @@
 import MiniSearch from 'minisearch'
 
 import { unpack } from './utils/unpack.js'
+import { getOutputWithPagination } from './utils/pagination.js'
 
-const DEFAULT_PAGE_SIZE = 15
 const EMPTY_RESULTS = {
 	items: [],
 	page: {
@@ -229,32 +229,12 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 
 		if (prePaginationSort) searchResults = prePaginationSort({ items: searchResults, query })
 
-		let size = query.pageSize === undefined || query.pageSize < 0
-			? DEFAULT_PAGE_SIZE
-			: query.pageSize
-		if (maxPageSize && size > maxPageSize) size = maxPageSize
-		const out = {
-			items: [],
-			page: size === 0
-				? { items: searchResults.length }
-				: {
-					items: searchResults.length,
-					offset: query.pageOffset || 0,
-					pages: searchResults.length % size
-						? Math.round(searchResults.length / size) + 1 // e.g. 12/10=1.2=>Math.round=1=>+1=2 pages
-						: searchResults.length / size, // e.g. 12%6=0=>12/6=2 pages
-					size,
-				},
-		}
+		const out = getOutputWithPagination({ query, maxPageSize, searchResults })
 		const addToFacets = (facet, key) => {
 			out.facets = out.facets || {}
 			out.facets[facet] = out.facets[facet] || {}
 			out.facets[facet][key] = (out.facets[facet][key] || 0) + 1
 		}
-
-		const start = size * out.page.offset // e.g. pageOffset = 3, start = 10*3 = 30
-		const end = start + size // e.g. 30+10 = 40
-		let index = 0
 		const facetNames = Object.keys(facets)
 		for (let item of searchResults) {
 			if (facetNames?.length)
@@ -263,9 +243,6 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 						if (Array.isArray(item[f])) for (const p of item[f]) addToFacets(f, p)
 						else addToFacets(f, item[f])
 					}
-			if (index >= start && index < end)
-				out.items.push(item)
-			index++
 		}
 
 		return out

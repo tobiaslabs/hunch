@@ -6,7 +6,7 @@ export default (assert, search) => [
 			}),
 			{
 				items: [],
-				page: { items: 4 },
+				page: { items: 4, size: 0 },
 				facets: {
 					tags: {
 						dogs: 2,
