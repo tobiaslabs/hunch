@@ -35,7 +35,7 @@ the query parameters and hands them to Hunch directly.
 
 import { readFile } from 'node:fs/promises'
 import { hunch } from '../dist/hunch.js'
-import { normalize } from '../dist/normalize.js'
+import { fromQuery } from '../dist/from-query.js'
 
 let search
 
@@ -45,7 +45,7 @@ export const handler = async event => {
 	})
 	return {
 		statusCode: 200,
-		body: JSON.stringify(search(normalize(event.queryStringParameters))),
+		body: JSON.stringify(search(fromQuery(event.queryStringParameters))),
 		headers: { 'content-type': 'application/json' },
 	}
 }

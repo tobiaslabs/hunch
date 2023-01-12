@@ -1,7 +1,7 @@
-export default (assert, search) => [
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'cool',
 			}),
 			{
@@ -34,7 +34,14 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({
+				index,
+				sort: ({ items, query }) => {
+					return query.sort === 'series'
+						? items.sort((a, b) => (a.series || '').localeCompare(b.series || ''))
+						: items
+				},
+			})({
 				q: 'cool',
 				sort: 'series',
 			}),
@@ -63,7 +70,7 @@ export default (assert, search) => [
 					},
 				},
 			},
-			'results with sorting the scores are retained',
+			'results with sorting using a custom function',
 		)
 	},
 ]

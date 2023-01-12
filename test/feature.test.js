@@ -51,16 +51,13 @@ for (const feature of features) {
 	const unsilence = silence()
 	for (const conf of configurations) {
 		log('  -', conf)
-		const { default: options, setup } = await import(`./feature/${feature}/${conf}.config.js`)
+		const { default: options } = await import(`./feature/${feature}/${conf}.config.js`)
 		options.cwd = join(CWD, 'test', 'feature', feature)
 		options.input = `./content-${conf}`
 		options.searchableFields = options.searchableFields || [ 'description', 'title' ]
 		if (verbose) options.verbose = true
 		testTree[feature][conf] = {
-			search: hunch({
-				...(setup || {}),
-				index: await generate(options),
-			}),
+			index: await generate(options),
 			runner: await import(`./feature/${feature}/${conf}.test.js`).then(i => i.default),
 		}
 	}
@@ -71,7 +68,7 @@ console.log('Validating all assertions...')
 for (const feature in testTree) {
 	for (const conf in testTree[feature]) {
 		test(`${feature}: ${conf}`, () => {
-			const testList = testTree[feature][conf].runner(assert, testTree[feature][conf].search)
+			const testList = testTree[feature][conf].runner({ assert, hunch, index: testTree[feature][conf].index })
 			for (const t of testList) t()
 		})
 	}

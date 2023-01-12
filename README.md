@@ -194,10 +194,13 @@ results = {
 
 ## URL Query [docs](https://hunchjs.com/docs/searching)
 
-If you are using Hunch as an API with a URL query parameter interface, such as AWS Lambda, Cloudflare Worker, or even the browser, you can easily transform those query parameters into a normalized Hunch query object:
+If you are using Hunch as an API with a URL query parameter interface, such as AWS Lambda, Cloudflare Worker, or even the browser, you can easily transform those query parameters into a Hunch query object:
 
 ```js
-import { normalize } from 'hunch'
+// from the main
+import { fromQuery } from 'hunch'
+// or from the named export
+// import { fromQuery } from 'hunch/from-query'
 const query = normalize({
   q: 'fancy words',
   'facet[tags]': 'cats,-rabbits',

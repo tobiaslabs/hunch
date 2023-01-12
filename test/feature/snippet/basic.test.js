@@ -1,7 +1,7 @@
-export default (assert, search) => [
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'which is crooked',
 				snippet: { content: 30 },
 			}),
@@ -21,7 +21,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'which is crooked',
 				snippet: { content: 0 },
 			}),
@@ -41,7 +41,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'heart',
 				snippet: { content: 15 },
 			}).items[0]._chunk.content,
@@ -51,7 +51,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'obtained',
 				snippet: { content: 15 },
 			}).items[0]._chunk.content,
@@ -61,7 +61,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'test with',
 				snippet: { content: 25 },
 			}).items[0]._chunk.content,
@@ -71,7 +71,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'flush',
 				snippet: { content: 100 },
 			}).items.length,
@@ -79,7 +79,7 @@ export default (assert, search) => [
 			'the word "flush" does not exist',
 		)
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'flush',
 				snippet: { content: 30 },
 				fuzzy: 0.2,

@@ -1,7 +1,7 @@
-export default (assert, search) => [
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({ q: 'present' }),
+			hunch({ index })({ q: 'present' }),
 			{
 				items: [
 					{
@@ -27,7 +27,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({ q: 'words only present in' }),
+			hunch({ index })({ q: 'words only present in' }),
 			{
 				items: [
 					{
@@ -53,7 +53,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({ q: 'next part shared with' }),
+			hunch({ index })({ q: 'next part shared with' }),
 			{
 				items: [
 					{

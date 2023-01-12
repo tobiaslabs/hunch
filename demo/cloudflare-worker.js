@@ -17,7 +17,7 @@ the query parameters and hands them to Hunch directly.
 // Note that Workers don't support `import` so you'd need
 // a build step for this.
 import { hunch } from '../dist/hunch.js'
-import { normalize } from '../dist/normalize.js'
+import { fromQuery } from '../dist/from-query.js'
 
 let search
 
@@ -26,7 +26,7 @@ const fetch = async (request, env) => {
 		index: await env.KV_BINDING.get('your-hunch-key', { type: 'json' }),
 	})
 	return new Response(
-		JSON.stringify(search(normalize(new URL(request.url).searchParams))),
+		JSON.stringify(search(fromQuery(new URL(request.url).searchParams))),
 		{ headers: { 'Content-Type': 'application/json' } },
 	)
 }

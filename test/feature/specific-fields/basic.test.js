@@ -1,7 +1,7 @@
-export default (assert, search) => [
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'cool',
 			}),
 			{
@@ -26,7 +26,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'cool',
 				fields: [ 'description' ],
 			}),
@@ -46,7 +46,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'cool',
 				fields: [ 'description', 'content' ],
 			}),

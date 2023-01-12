@@ -23,10 +23,12 @@ const item4 = {
 	_chunk: { name: 'markdown', content: '\ncool\n' },
 }
 
-export default (assert, search) => [
+const maxPageSize = 3
+
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({
+			hunch({ index, maxPageSize })({
 				q: 'cool',
 			}),
 			{
@@ -42,7 +44,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index, maxPageSize })({
 				q: 'cool',
 				pageSize: 2,
 			}),
@@ -58,7 +60,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index, maxPageSize })({
 				q: 'cool',
 				pageSize: 2,
 				pageOffset: 1,
@@ -75,7 +77,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index, maxPageSize })({
 				q: 'cool',
 				pageSize: 100,
 			}),

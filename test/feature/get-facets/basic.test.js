@@ -1,7 +1,7 @@
-export default (assert, search) => [
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				pageSize: 0,
 			}),
 			{
@@ -24,7 +24,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				pageSize: 1,
 			}),
 			{

@@ -1,7 +1,7 @@
-export default (assert, search) => [
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'words',
 				facetInclude: { tags: [ 'cats' ] },
 			}),
@@ -35,7 +35,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'words',
 				facetInclude: { tags: [ 'cats' ] },
 				facetExclude: { tags: [ 'dogs' ] },
@@ -62,7 +62,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'words',
 				facetInclude: { field_that_does_not_exist: [ 'yolo' ] },
 			}),

@@ -1,14 +1,14 @@
-export default (assert, search) => [
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({ id: 'file_that_does_not_exist.md' }),
+			hunch({ index })({ id: 'file_that_does_not_exist.md' }),
 			{ item: null },
 			'getting a file that does not exist',
 		)
 	},
 	() => {
 		assert.equal(
-			search({ id: 'file1.md' }),
+			hunch({ index })({ id: 'file1.md' }),
 			{
 				item: {
 					podcastId: 123,
