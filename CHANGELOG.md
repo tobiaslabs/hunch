@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+### Patch Changes
+
+- 5910916: Make sure sort query parameter is passed along untouched.
+
 ## 0.3.1
 
 ### Patch Changes
