@@ -7,8 +7,9 @@ name: test
 
 on:
   push:
-    branches: [ '**' ]
-    branches-ignore: [ 'main' ]
+    branches:
+      - '**'
+      - '!main'
 
 jobs:
   build:
