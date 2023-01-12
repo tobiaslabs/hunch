@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 
 import { generate } from '../dist/generate.js'
-import { normalize } from '../dist/normalize.js'
+import { fromQuery } from '../dist/from-query.js'
 import { hunch } from '../dist/hunch.js'
 
 // We can use the CLI, or programmatically call Hunch, like this:
@@ -28,7 +28,7 @@ console.log('HunchJS completed...')
 // You could even use Hunch for a CLI-based search tool, I suppose!
 const index = JSON.parse(await readFile('./build/hunch.json', 'utf8'))
 const search = hunch({ index })
-const { items, page, facets } = search(normalize({
+const { items, page, facets } = search(fromQuery({
 	q: 'you know what I like about cats',
 	'facets[tags]': 'cats,-dogs',
 }))
