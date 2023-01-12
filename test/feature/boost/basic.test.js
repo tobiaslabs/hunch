@@ -1,7 +1,7 @@
-export default (assert, search) => [
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'cool words',
 			}),
 			{
@@ -26,7 +26,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'cool words',
 				boost: { description: 10 },
 			}),
@@ -52,7 +52,7 @@ export default (assert, search) => [
 	},
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'cool words',
 				boost: { field_that_does_not_exist: 10 },
 			}),

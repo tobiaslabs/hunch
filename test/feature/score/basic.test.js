@@ -1,7 +1,7 @@
-export default (assert, search) => [
+export default ({ assert, hunch, index }) => [
 	() => {
 		assert.equal(
-			search({
+			hunch({ index })({
 				q: 'cooler than cool',
 			}),
 			{
