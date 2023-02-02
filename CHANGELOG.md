@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0
+
+### Minor Changes
+
+- 7aa6927: You can pass in the `--serve` flag to get a simple HTTP server, using canonical query parameters.
+- ebd2ab1: You can pass in `--watch` and the index will be rebuilt on content changes.
+
 ## 0.3.2
 
 ### Patch Changes
