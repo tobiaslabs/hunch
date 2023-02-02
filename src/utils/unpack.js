@@ -87,6 +87,7 @@ export const unpack = ({
 	const inMemoryFileMetadataCache = {}
 	unpacked.getFileMetadata = fileId => {
 		if (!inMemoryFileMetadataCache[fileId]) {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { content: ignore, ...overallFields } = miniSearch.storedFields[fileIdToDocumentIds[fileId][0]] || {}
 			inMemoryFileMetadataCache[fileId] = {
 				...unpackTree(fileId, fileMetadata),

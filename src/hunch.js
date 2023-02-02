@@ -211,6 +211,7 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 		}
 		searchResults = searchResults
 			.filter(r => chunkIdToKeep[r.id])
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			.map(({ terms: ignore1, match: ignore2, id, score, content, ...props }) => {
 				const metadata = getFileMetadata(chunkIdToFileIndex[id])
 				if (score) metadata._score = Math.round(score * 1000) / 1000
