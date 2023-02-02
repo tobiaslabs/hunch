@@ -37,7 +37,7 @@
     "test:lint": "eslint 'src/**/*.js' 'bin.js' 'rollup.config.js'",
     "build": "rollup -c",
     "demo": "cd demo && rm -rf build && node demo.test.js",
-    "demo-server": "node src/cli.js --cwd demo --config demo/hunch.demo-config.js --serve 3001",
+    "demo-server": "node src/cli.js --cwd demo --config demo/hunch.demo-config.js --serve 3001 --watch",
     "release": "npm run build && changeset publish"
   },
   "repository": {
@@ -70,6 +70,7 @@
     "@rollup/plugin-replace": "^5.0.2",
     "@saibotsivad/blockdown": "^3.0.0",
     "@saibotsivad/eslint-config-saibotsivad": "*",
+    "cheap-watch": "^1.0.4",
     "js-yaml": "^4.1.0",
     "minisearch": "^6.0.0",
     "rollup": "^3.9.0",

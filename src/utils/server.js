@@ -5,11 +5,11 @@ import { createServer } from 'node:http'
 
 const HOSTNAME = '127.0.0.1'
 let server
-export const startServer = ({ port, index }) => new Promise(() => {
+export const startServer = ({ port, index }) => {
 	if (server) server.close(() => {
 		console.log('HunchJS server restarting due to index changes...')
 		server = undefined
-		setTimeout(() => { startServer({ port }) })
+		setTimeout(() => { startServer({ port, index }) })
 	})
 	else {
 		const search = hunch({ index })
@@ -38,4 +38,4 @@ export const startServer = ({ port, index }) => new Promise(() => {
 			console.log(`HunchJS server running: http://${HOSTNAME}:${port}/`)
 		})
 	}
-})
+}
