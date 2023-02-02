@@ -1,7 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve, isAbsolute } from 'node:path'
 import sade from 'sade'
+
 import { generate } from './generate.js'
+import { startServer } from './utils/server.js'
 
 // numbers picked to look approximately nice enough
 const humanTime = millis => {
@@ -15,9 +17,7 @@ const humanBytes = bytes => {
 	else return `${Math.round(bytes / 100_000) / 10} MB`
 }
 
-const cli = sade('hunch', true)
-
-const run = async ({ config, cwd, indent, verbose }) => {
+const run = async ({ config, cwd, serve, indent, verbose }) => {
 	const { default: opts } = await import(config)
 	let { output: outputFilepath } = opts
 
@@ -29,25 +29,34 @@ const run = async ({ config, cwd, indent, verbose }) => {
 	const string = JSON.stringify(outputData, undefined, indent ? '\t' : '')
 	console.log('Index file size:', humanBytes(new TextEncoder().encode(string).length))
 	await writeFile(outputFilepath, string, 'utf8')
+
+	if (serve) await startServer({
+		port: typeof serve === 'number' ? serve : 9001,
+		index: outputData,
+	})
 }
+
+const cli = sade('hunch', true)
 
 cli
 	.version('__build_version__')
 	.describe('Compiled search for your static Markdown files.')
 	.option('-c, --config', 'Path to configuration file.', 'hunch.config.js')
 	.option('--cwd', 'Set the current working directory somewhere else.')
+	.option('--serve', 'Start a search server using canonical query parameters. (Default port: 9001)')
 	.option('--indent', 'Indent the output JSON, typically for debugging purposes.')
 	.option('--verbose', 'Print additional information during build.')
 	.example('--config hunch.config.js')
 	.example('-c hunch.config.js')
 	.example('--config hunch.config.js --cwd ../../ --indent --verbose')
-	.action(({ config, cwd, indent, verbose }) => {
+	.example('--serve 8080 # change the port')
+	.action(({ config, cwd, serve, indent, verbose }) => {
 		cwd = cwd || process.cwd()
 		if (!isAbsolute(cwd)) cwd = resolve(cwd)
 		if (typeof config !== 'string') config = 'hunch.config.js'
 		if (!isAbsolute(config)) config = resolve(config)
 		const start = Date.now()
-		run({ config, cwd, indent, verbose })
+		run({ config, cwd, serve, indent, verbose })
 			.then(() => {
 				console.log(`Hunch completed in ${humanTime(Date.now() - start)}.`)
 				process.exit(0)
