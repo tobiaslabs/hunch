@@ -35,6 +35,7 @@ const castToUniqueStrings = string => ([
  * @param {Object<string,number>} [boost] - The metadata key to boost by some value greater than 1. (Float. Default: 1)
  * @param {Object<string,Array<string>>} [facetInclude] - Constrain the search results to records containing metadata with exact values.
  * @param {Object<string,Array<string>>} [facetExclude] - Constrain the search results to records that does not contain metadata with exact values.
+ * @param {Array<string>} [includeFields] - A list of fields to include on search results. (Default: all fields are returned.)
  */
 
 /**
@@ -94,6 +95,8 @@ export const fromQuery = params => {
 					parsed.facetInclude[child].push(val)
 				}
 			}
+		} else if (parent === 'include' && child === 'fields') {
+			parsed.includeFields = castToUniqueStrings(params[key])
 		}
 	}
 

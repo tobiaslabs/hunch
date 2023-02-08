@@ -17,6 +17,7 @@ export const toQuery = query => {
 	if (query.prefix) out.prefix = 'true'
 	if (query.suggest) out.suggest = 'true'
 	if (query.fields?.length) out.fields = query.fields.join(',')
+	if (query.includeFields?.length) out['include[fields]'] = query.includeFields.join(',')
 
 	if (Array.isArray(query.sort) && query.sort.length)
 		out.sort = query.sort.map(({ key, descending }) => `${descending ? '-' : ''}${key}`).join(',')

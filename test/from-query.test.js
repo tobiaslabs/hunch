@@ -34,6 +34,10 @@ test('turn query parameters into a hunch query', () => {
 		},
 		'the comma separated sort list is converted',
 	)
+	assert.equal(
+		fromQuery({ 'include[fields]': 'foo,bar' }),
+		{ includeFields: [ 'foo', 'bar' ] },
+	)
 	assert.throws(
 		() => fromQuery({ 'page[size]': '-3' }),
 		/The parameter "page\[size]" must be an integer greater or equal to zero/,

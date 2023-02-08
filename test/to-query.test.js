@@ -21,21 +21,6 @@ test('turn query parameters into a hunch query', () => {
 			'facets[tags]': 'cats,-dogs',
 		}),
 	)
-	assert.equal(
-		toQuery({
-			sort: [
-				{ key: 'foo', descending: false },
-				{ key: 'bar', descending: true },
-			],
-		}),
-		toString({ sort: 'foo,-bar' }),
-		'the sort is passed along as well',
-	)
-	assert.equal(
-		toQuery({ sort: [] }),
-		toString({}),
-		'an empty array does nothing',
-	)
 
 	const testEveryProperty = [
 		[
@@ -90,6 +75,26 @@ test('turn query parameters into a hunch query', () => {
 			'suggestion',
 			{ suggest: true },
 			{ suggest: 'true' },
+		],
+		[
+			'sort',
+			{
+				sort: [
+					{ key: 'foo', descending: false },
+					{ key: 'bar', descending: true },
+				],
+			},
+			{ sort: 'foo,-bar' },
+		],
+		[
+			'empty sort',
+			{ sort: [] },
+			{},
+		],
+		[
+			'include fields',
+			{ includeFields: [ 'foo', 'bar' ] },
+			{ 'include[fields]': 'foo,bar' },
 		],
 	]
 	for (const [ label, query, expected ] of testEveryProperty)
