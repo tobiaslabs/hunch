@@ -10,6 +10,7 @@ Hunch supports these search features:
 - Fuzzy search [docs](https://hunchjs.com/docs/searching#fuzzy-search)
 - Return only partial snippet [docs](https://hunchjs.com/docs/searching#snippet)
 - Search specific fields [docs](https://hunchjs.com/docs/searching#search-specific-fields)
+- Return specific fields [docs](https://hunchjs.com/docs/searching#return-specific-fields)
 - Prefix search [docs](https://hunchjs.com/docs/searching#prefix)
 - Search suggestions [docs](https://hunchjs.com/docs/searching#suggest)
 - Boosting metadata properties [docs](https://hunchjs.com/docs/searching#boost)

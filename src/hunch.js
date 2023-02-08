@@ -62,6 +62,12 @@ const defaultPrePaginationSort = ({ items, query }) => {
 		: items
 }
 
+const removeFieldsNotIncluded = (items, includedFields) => items.map(item => {
+	const out = { _id: item._id }
+	for (const field of includedFields) if (item[field] !== undefined) out[field] = item[field]
+	return out
+})
+
 const approximateTextExtraction = (string, cursor, size) => {
 	let out = ''
 	let forwardCursor = cursor + 1
@@ -245,6 +251,7 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 		if (query.facetInclude || query.facetExclude) searchResults = filterDocuments(searchResults, query)
 
 		searchResults = prePaginationSort({ items: searchResults, query })
+		if (query.includeFields?.length) searchResults = removeFieldsNotIncluded(searchResults, query.includeFields)
 
 		const out = getOutputWithPagination({ query, maxPageSize, searchResults })
 		const addToFacets = (facet, key) => {
@@ -252,7 +259,9 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 			out.facets[facet] = out.facets[facet] || {}
 			out.facets[facet][key] = (out.facets[facet][key] || 0) + 1
 		}
-		const facetNames = Object.keys(facets)
+		const facetNames = query.includeFields?.length
+			? query.includeFields.filter(f => facets[f])
+			: Object.keys(facets)
 		for (let item of searchResults) {
 			if (facetNames?.length)
 				for (const f of facetNames)
