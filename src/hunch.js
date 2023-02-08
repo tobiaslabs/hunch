@@ -48,6 +48,20 @@ const filterDocuments = (searchResults, query) => {
 	})
 }
 
+const defaultPrePaginationSort = ({ items, query }) => {
+	return query?.sort?.length
+		? items.sort((a, b) => {
+			for (const { key, descending } of query.sort) {
+				// Ascending: 'aaa'.localeCompare('bbb') === 1
+				// Descending: 'bbb'.localeCompare('aaa') === 1
+				const sorted = ((descending ? b : a)[key] || '').toString().localeCompare(((descending ? a : b)[key] || '').toString())
+				if (sorted !== 0) return sorted
+			}
+			return 0
+		})
+		: items
+}
+
 const approximateTextExtraction = (string, cursor, size) => {
 	let out = ''
 	let forwardCursor = cursor + 1
@@ -120,6 +134,8 @@ const snipContent = ({ q, snippet: propertiesToSnip, fuzzy }, searchResult) => {
 }
 
 export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSize }) => {
+	if (!prePaginationSort) prePaginationSort = defaultPrePaginationSort
+
 	const {
 		chunkIdToFileIndex,
 		facets,
@@ -136,8 +152,8 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 	const init = () => mini = MiniSearch.loadJS(miniSearch, _minisearchOptions)
 
 	return query => {
-		// If for example you specify `facet[tags]=cats` and there are no documents
-		// containing that tag, we can just short circuit and exit early.
+		// If for example you specify a `facetInclude` value and there are no documents
+		// containing that value, we can just short circuit and exit early.
 		if (shouldExitEarlyForEmptySet({ query, facets, searchableFields })) return EMPTY_RESULTS
 
 		if (query.id) {
@@ -228,7 +244,7 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 
 		if (query.facetInclude || query.facetExclude) searchResults = filterDocuments(searchResults, query)
 
-		if (prePaginationSort) searchResults = prePaginationSort({ items: searchResults, query })
+		searchResults = prePaginationSort({ items: searchResults, query })
 
 		const out = getOutputWithPagination({ query, maxPageSize, searchResults })
 		const addToFacets = (facet, key) => {
