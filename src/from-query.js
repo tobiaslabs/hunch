@@ -28,13 +28,13 @@ const castToUniqueStrings = string => ([
  * @param {number} [fuzzy] - The fuzziness of the main query parameter. (Float. Default: none.)
  * @param {boolean} [prefix] - Whether to use the query string as a prefix.
  * @param {boolean} [suggest] - Whether to use the query string to suggest other search queries.
- * @param {Array<string>}} [fields] - The fields to search within.
- * @param {Any} [sort] - The sort property passed to the pre-pagination sort function.
+ * @param {Array<string>} [fields] - The fields to search within.
+ * @param {Array<{key:string,descending:boolean}>} [sort] - The list of ordered sort parameters passed to the pre-pagination sort function.
  * @param {number} [pageOffset] - The zero-index number of pagination offsets to use in the search. (Integer. Default: none)
  * @param {number} [pageSize] - The number of items per pagination. (Integer. Default: none)
  * @param {Object<string,number>} [boost] - The metadata key to boost by some value greater than 1. (Float. Default: 1)
  * @param {Object<string,Array<string>>} [facetInclude] - Constrain the search results to records containing metadata with exact values.
- * @param {Object<string,Array<string>>} [facetExclude] - Constrain the search results to records that does notcontaining metadata with exact values.
+ * @param {Object<string,Array<string>>} [facetExclude] - Constrain the search results to records that does not contain metadata with exact values.
  */
 
 /**
@@ -61,7 +61,13 @@ export const fromQuery = params => {
 
 	if (params.fields) parsed.fields = castToUniqueStrings(params.fields)
 
-	if (params.sort !== undefined) parsed.sort = params.sort
+	if (params.sort) {
+		parsed.sort = []
+		for (const sort of params.sort.split(',')) parsed.sort.push({
+			key: sort[0] === '-' ? sort.substring(1) : sort,
+			descending: sort[0] === '-',
+		})
+	}
 
 	if (params['page[offset]']) parsed.pageOffset = castToInt(params, 'page[offset]')
 	if (params['page[size]']) parsed.pageSize = castToInt(params, 'page[size]')

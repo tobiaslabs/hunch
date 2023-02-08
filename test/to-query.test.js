@@ -22,14 +22,19 @@ test('turn query parameters into a hunch query', () => {
 		}),
 	)
 	assert.equal(
-		toQuery({ sort: 'only strings' }),
-		toString({ sort: 'only strings' }),
+		toQuery({
+			sort: [
+				{ key: 'foo', descending: false },
+				{ key: 'bar', descending: true },
+			],
+		}),
+		toString({ sort: 'foo,-bar' }),
 		'the sort is passed along as well',
 	)
 	assert.equal(
-		toQuery({ sort: { foo: 3 } }),
-		toString({ sort: '[object Object]' }),
-		'the toString() is called to cast',
+		toQuery({ sort: [] }),
+		toString({}),
+		'an empty array does nothing',
 	)
 
 	const testEveryProperty = [
