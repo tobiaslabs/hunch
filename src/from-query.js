@@ -21,6 +21,12 @@ const castToUniqueStrings = string => ([
 	...new Set(string.split(',').map(f => f.trim())),
 ])
 
+const addFacetMatcher = (parsed, key, facet, value) => {
+	parsed[key] = parsed[key] || {}
+	parsed[key][facet] = parsed[key][facet] || []
+	parsed[key][facet].push(value)
+}
+
 /**
  * @typedef {Object} QueryParameters
  * @param {string} [q] - The text to search for.
@@ -33,7 +39,8 @@ const castToUniqueStrings = string => ([
  * @param {number} [pageOffset] - The zero-index number of pagination offsets to use in the search. (Integer. Default: none)
  * @param {number} [pageSize] - The number of items per pagination. (Integer. Default: none)
  * @param {Object<string,number>} [boost] - The metadata key to boost by some value greater than 1. (Float. Default: 1)
- * @param {Object<string,Array<string>>} [facetMustMatch] - Constrain the search results to records containing facets with exact values.
+ * @param {Object<string,Array<string>>} [facetMustMatch] - Constrain the search results to records containing facets with all facet values.
+ * @param {Object<string,Array<string>>} [facetMustMatchAny] - Constrain the search results to records containing any of the facet values.
  * @param {Object<string,Array<string>>} [facetMustNotMatch] - Constrain the search results to records that do not contain facets with exact values.
  * @param {Array<string>} [includeFields] - A list of fields to include on each search result. (Default: all fields are returned.)
  * @param {Array<string>} [includeFacets] - A list of facet names to include on the overall search result response. Use `*` for all facets. (Default: only facets found in search results.)
@@ -86,15 +93,9 @@ export const fromQuery = params => {
 		} else if (parent === 'facets') {
 			const values = castToUniqueStrings(params[key])
 			for (const val of values) {
-				if (val[0] === '-') {
-					parsed.facetMustNotMatch = parsed.facetMustNotMatch || {}
-					parsed.facetMustNotMatch[child] = parsed.facetMustNotMatch[child] || []
-					parsed.facetMustNotMatch[child].push(val.substring(1))
-				} else {
-					parsed.facetMustMatch = parsed.facetMustMatch || {}
-					parsed.facetMustMatch[child] = parsed.facetMustMatch[child] || []
-					parsed.facetMustMatch[child].push(val)
-				}
+				if (val[0] === '-') addFacetMatcher(parsed, 'facetMustNotMatch', child, val.substring(1))
+				else if (val[0] === '~') addFacetMatcher(parsed, 'facetMustMatchAny', child, val.substring(1))
+				else addFacetMatcher(parsed, 'facetMustMatch', child, val)
 			}
 		} else if (parent === 'include' && child === 'fields') {
 			parsed.includeFields = castToUniqueStrings(params[key])

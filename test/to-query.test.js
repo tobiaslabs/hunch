@@ -14,11 +14,12 @@ test('turn query parameters into a hunch query', () => {
 		toQuery({
 			q: 'foo',
 			facetMustMatch: { tags: [ 'cats' ] },
+			facetMustMatchAny: { tags: [ 'rabbits' ] },
 			facetMustNotMatch: { tags: [ 'dogs' ] },
 		}),
 		toString({
 			q: 'foo',
-			'facets[tags]': 'cats,-dogs',
+			'facets[tags]': 'cats,~rabbits,-dogs',
 		}),
 	)
 
@@ -37,9 +38,10 @@ test('turn query parameters into a hunch query', () => {
 			'facets',
 			{
 				facetMustMatch: { tags: [ 'cats' ] },
+				facetMustMatchAny: { tags: [ 'rabbits' ] },
 				facetMustNotMatch: { tags: [ 'dogs' ] },
 			},
-			{ 'facets[tags]': 'cats,-dogs' },
+			{ 'facets[tags]': 'cats,~rabbits,-dogs' },
 		],
 		[
 			'full text lookup',

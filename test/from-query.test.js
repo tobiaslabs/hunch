@@ -16,10 +16,11 @@ test('turn query parameters into a hunch query', () => {
 		},
 	)
 	assert.equal(
-		fromQuery(new URL(`https://site.com?q=foo&${encodeURIComponent('facets[tags]')}=${encodeURIComponent('cats,-dogs')}`).searchParams),
+		fromQuery(new URL(`https://site.com?q=foo&${encodeURIComponent('facets[tags]')}=${encodeURIComponent('cats,-dogs,~rabbits')}`).searchParams),
 		{
 			q: 'foo',
 			facetMustMatch: { tags: [ 'cats' ] },
+			facetMustMatchAny: { tags: [ 'rabbits' ] },
 			facetMustNotMatch: { tags: [ 'dogs' ] },
 		},
 	)

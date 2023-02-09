@@ -8,25 +8,36 @@ import { hunch } from '../src/hunch.js'
 
 const CWD = process.cwd()
 
-const features = [
-	'boost',
-	'by-id',
-	'facet-matching',
-	'full-text-lookup',
-	'fuzzy-search',
-	'get-facets',
-	'pagination',
-	'prefix',
-	'return-specific-facets',
-	'return-specific-fields',
-	'score',
-	'search-specific-fields',
-	'snippet',
-	'sort',
-	'stop-words',
-	'stored-fields',
-	'suggest',
-]
+/*
+
+Test a single feature, e.g.:
+
+	node test/feature.test.js facet-matching
+
+*/
+const [ , , namedFeature ] = process.argv
+
+const features = namedFeature
+	? [ namedFeature ]
+	:[
+		'boost',
+		'by-id',
+		'facet-matching',
+		'full-text-lookup',
+		'fuzzy-search',
+		'get-facets',
+		'pagination',
+		'prefix',
+		'return-specific-facets',
+		'return-specific-fields',
+		'score',
+		'search-specific-fields',
+		'snippet',
+		'sort',
+		'stop-words',
+		'stored-fields',
+		'suggest',
+	]
 
 const verbose = process.argv.includes('--verbose')
 
