@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0
+
+### Minor Changes
+
+- bf2fcd7: There is now a default sort function. To change, you must override.
+- 823bed6: Change returned facet map to include count of all versus search result.
+- 77d3bb7: Add ability to return sparse results.
+- 079f9bd: The canonical query parameter "sort" is now set, instead of anything-goes.
+- 668775b: Add functionality to return only limited fields.
+
 ## 0.4.0
 
 ### Minor Changes
