@@ -17,6 +17,7 @@ const features = [
 	'get-facets',
 	'pagination',
 	'prefix',
+	'return-specific-facets',
 	'return-specific-fields',
 	'score',
 	'search-specific-fields',

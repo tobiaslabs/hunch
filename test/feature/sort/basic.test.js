@@ -24,8 +24,8 @@ export default ({ assert, hunch, index }) => [
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
 				facets: {
 					series: {
-						aaa: { all:1, search:1 },
-						bbb: { all:1, search:1 },
+						aaa: { all: 1, search: 1 },
+						bbb: { all: 1, search: 1 },
 					},
 				},
 			},
@@ -65,8 +65,8 @@ export default ({ assert, hunch, index }) => [
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
 				facets: {
 					series: {
-						aaa: { all:1, search:1 },
-						bbb: { all:1, search:1 },
+						aaa: { all: 1, search: 1 },
+						bbb: { all: 1, search: 1 },
 					},
 				},
 			},

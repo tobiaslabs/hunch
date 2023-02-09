@@ -35,8 +35,8 @@ const castToUniqueStrings = string => ([
  * @param {Object<string,number>} [boost] - The metadata key to boost by some value greater than 1. (Float. Default: 1)
  * @param {Object<string,Array<string>>} [facetMustMatch] - Constrain the search results to records containing facets with exact values.
  * @param {Object<string,Array<string>>} [facetMustNotMatch] - Constrain the search results to records that do not contain facets with exact values.
- * @param {Array<string>} [includeFields] - A list of fields to include on search results. (Default: all fields are returned.)
- * @param {Array<string>} [includeFacets] - A list of facets to include on search results. Use `*` for all facets. (Default: only facets found in search results.)
+ * @param {Array<string>} [includeFields] - A list of fields to include on each search result. (Default: all fields are returned.)
+ * @param {Array<string>} [includeFacets] - A list of facet names to include on the overall search result response. Use `*` for all facets. (Default: only facets found in search results.)
  */
 
 /**
