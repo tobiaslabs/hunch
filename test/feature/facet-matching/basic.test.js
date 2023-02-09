@@ -3,7 +3,7 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'words',
-				facetInclude: { tags: [ 'cats' ] },
+				facetMustMatch: { tags: [ 'cats' ] },
 			}),
 			{
 				items: [
@@ -25,8 +25,8 @@ export default ({ assert, hunch, index }) => [
 				page: { items: 2, offset: 0, pages: 1, size: 15 },
 				facets: {
 					tags: {
-						dogs: 1,
-						cats: 2,
+						dogs: { all: 2, search: 1 },
+						cats: { all: 2, search: 2 },
 					},
 				},
 			},
@@ -37,8 +37,8 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'words',
-				facetInclude: { tags: [ 'cats' ] },
-				facetExclude: { tags: [ 'dogs' ] },
+				facetMustMatch: { tags: [ 'cats' ] },
+				facetMustNotMatch: { tags: [ 'dogs' ] },
 			}),
 			{
 				items: [
@@ -53,7 +53,7 @@ export default ({ assert, hunch, index }) => [
 				page: { items: 1, offset: 0, pages: 1, size: 15 },
 				facets: {
 					tags: {
-						cats: 1,
+						cats: { all: 2, search: 1 },
 					},
 				},
 			},
@@ -64,11 +64,11 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'words',
-				facetInclude: { field_that_does_not_exist: [ 'yolo' ] },
+				facetMustMatch: { field_that_does_not_exist: [ 'yolo' ] },
 			}),
 			{
 				items: [],
-				page: { items: 0, offset: 0, pages: 0 },
+				page: { items: 0, offset: 0, pages: 0, size: 15 },
 			},
 			'only one files has cats and NOT dogs',
 		)

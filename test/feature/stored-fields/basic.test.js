@@ -28,8 +28,8 @@ export default ({ assert, hunch, index }) => [
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
 				facets: {
 					tags: {
-						dogs: 2,
-						cats: 1,
+						dogs: { all: 2, search: 2 },
+						cats: { all: 1, search: 1 },
 					},
 				},
 			},

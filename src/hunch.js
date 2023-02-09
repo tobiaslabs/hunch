@@ -23,13 +23,13 @@ const shouldExitEarlyForEmptySet = ({ query, facets, searchableFields }) => {
 }
 
 const filterDocuments = (searchResults, query) => {
-	const include = query.facetInclude || {}
-	const exclude = query.facetExclude || {}
+	const must = query.facetMustMatch || {}
+	const mustNot = query.facetMustNotMatch || {}
 	return searchResults.filter(document => {
 		let matches = true
-		for (const name in include) {
+		for (const name in must) {
 			if (!document[name]) matches = false
-			else for (const value of include[name]) {
+			else for (const value of must[name]) {
 				if (Array.isArray(document[name])) {
 					if (!document[name].includes(value)) matches = false
 				} else if (document[name] !== value) {
@@ -37,7 +37,7 @@ const filterDocuments = (searchResults, query) => {
 				}
 			}
 		}
-		for (const name in exclude) for (const value of exclude[name]) {
+		for (const name in mustNot) for (const value of mustNot[name]) {
 			if (Array.isArray(document[name])) {
 				if (document[name].includes(value)) matches = false
 			} else if (document[name] === value) {
@@ -47,6 +47,26 @@ const filterDocuments = (searchResults, query) => {
 		return matches
 	})
 }
+
+const defaultPrePaginationSort = ({ items, query }) => {
+	return query?.sort?.length
+		? items.sort((a, b) => {
+			for (const { key, descending } of query.sort) {
+				// Ascending: 'aaa'.localeCompare('bbb') === 1
+				// Descending: 'bbb'.localeCompare('aaa') === 1
+				const sorted = ((descending ? b : a)[key] || '').toString().localeCompare(((descending ? a : b)[key] || '').toString())
+				if (sorted !== 0) return sorted
+			}
+			return 0
+		})
+		: items
+}
+
+const removeFieldsNotIncluded = (items, includedFields) => items.map(item => {
+	const out = { _id: item._id }
+	for (const field of includedFields) if (item[field] !== undefined) out[field] = item[field]
+	return out
+})
 
 const approximateTextExtraction = (string, cursor, size) => {
 	let out = ''
@@ -120,6 +140,8 @@ const snipContent = ({ q, snippet: propertiesToSnip, fuzzy }, searchResult) => {
 }
 
 export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSize }) => {
+	if (!prePaginationSort) prePaginationSort = defaultPrePaginationSort
+
 	const {
 		chunkIdToFileIndex,
 		facets,
@@ -136,8 +158,8 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 	const init = () => mini = MiniSearch.loadJS(miniSearch, _minisearchOptions)
 
 	return query => {
-		// If for example you specify `facet[tags]=cats` and there are no documents
-		// containing that tag, we can just short circuit and exit early.
+		// If for example you specify a `facetInclude` value and there are no documents
+		// containing that value, we can just short circuit and exit early.
 		if (shouldExitEarlyForEmptySet({ query, facets, searchableFields })) return EMPTY_RESULTS
 
 		if (query.id) {
@@ -226,26 +248,46 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 				})
 			})
 
-		if (query.facetInclude || query.facetExclude) searchResults = filterDocuments(searchResults, query)
+		if (query.facetMustMatch || query.facetMustNotMatch) searchResults = filterDocuments(searchResults, query)
 
-		if (prePaginationSort) searchResults = prePaginationSort({ items: searchResults, query })
+		searchResults = prePaginationSort({ items: searchResults, query })
+		if (query.includeFields?.length) searchResults = removeFieldsNotIncluded(searchResults, query.includeFields)
 
-		const out = getOutputWithPagination({ query, maxPageSize, searchResults })
-		const addToFacets = (facet, key) => {
-			out.facets = out.facets || {}
-			out.facets[facet] = out.facets[facet] || {}
-			out.facets[facet][key] = (out.facets[facet][key] || 0) + 1
+		const outputFacets = {}
+		const addToFacets = (facet, key, add) => {
+			outputFacets[facet] = outputFacets[facet] || {}
+			outputFacets[facet][key] = outputFacets[facet][key] || {
+				all: facets[facet]?.get?.(key)?.length || 0,
+				search: 0,
+			}
+			if (add) outputFacets[facet][key].search += add
 		}
-		const facetNames = Object.keys(facets)
-		for (let item of searchResults) {
-			if (facetNames?.length)
+
+		// If the query requests to include specific facets, we need to
+		// add the overall counts.
+		if (query.includeFacets?.includes('*')) {
+			for (const facet in facets)
+				for (const key of facets[facet].keys()) addToFacets(facet, key)
+		} else if (query.includeFacets?.length) {
+			for (const facet of query.includeFacets)
+				for (const key of facets[facet].keys()) addToFacets(facet, key)
+		}
+
+		// Then, we need to set the search-result facet counts, before we
+		// limit the search results through pagination.
+		const facetNames = query.includeFacets?.length && !query.includeFacets.includes('*')
+			? query.includeFacets.filter(f => facets[f])
+			: Object.keys(facets)
+		if (facetNames?.length)
+			for (let item of searchResults)
 				for (const f of facetNames)
 					if (item[f]) {
-						if (Array.isArray(item[f])) for (const p of item[f]) addToFacets(f, p)
-						else addToFacets(f, item[f])
+						if (Array.isArray(item[f])) for (const p of item[f]) addToFacets(f, p, 1)
+						else addToFacets(f, item[f], 1)
 					}
-		}
 
+		const out = getOutputWithPagination({ query, maxPageSize, searchResults })
+		if (Object.keys(outputFacets).length) out.facets = outputFacets
 		return out
 	}
 }

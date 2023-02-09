@@ -13,23 +13,13 @@ test('turn query parameters into a hunch query', () => {
 	assert.equal(
 		toQuery({
 			q: 'foo',
-			facetInclude: { tags: [ 'cats' ] },
-			facetExclude: { tags: [ 'dogs' ] },
+			facetMustMatch: { tags: [ 'cats' ] },
+			facetMustNotMatch: { tags: [ 'dogs' ] },
 		}),
 		toString({
 			q: 'foo',
 			'facets[tags]': 'cats,-dogs',
 		}),
-	)
-	assert.equal(
-		toQuery({ sort: 'only strings' }),
-		toString({ sort: 'only strings' }),
-		'the sort is passed along as well',
-	)
-	assert.equal(
-		toQuery({ sort: { foo: 3 } }),
-		toString({ sort: '[object Object]' }),
-		'the toString() is called to cast',
 	)
 
 	const testEveryProperty = [
@@ -46,8 +36,8 @@ test('turn query parameters into a hunch query', () => {
 		[
 			'facets',
 			{
-				facetInclude: { tags: [ 'cats' ] },
-				facetExclude: { tags: [ 'dogs' ] },
+				facetMustMatch: { tags: [ 'cats' ] },
+				facetMustNotMatch: { tags: [ 'dogs' ] },
 			},
 			{ 'facets[tags]': 'cats,-dogs' },
 		],
@@ -85,6 +75,31 @@ test('turn query parameters into a hunch query', () => {
 			'suggestion',
 			{ suggest: true },
 			{ suggest: 'true' },
+		],
+		[
+			'sort',
+			{
+				sort: [
+					{ key: 'foo', descending: false },
+					{ key: 'bar', descending: true },
+				],
+			},
+			{ sort: 'foo,-bar' },
+		],
+		[
+			'empty sort',
+			{ sort: [] },
+			{},
+		],
+		[
+			'include fields',
+			{ includeFields: [ 'foo', 'bar' ] },
+			{ 'include[fields]': 'foo,bar' },
+		],
+		[
+			'include facets',
+			{ includeFacets: [ 'foo', 'bar' ] },
+			{ 'include[facets]': 'foo,bar' },
 		],
 	]
 	for (const [ label, query, expected ] of testEveryProperty)

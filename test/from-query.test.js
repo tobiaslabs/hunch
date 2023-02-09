@@ -11,29 +11,37 @@ test('turn query parameters into a hunch query', () => {
 		}),
 		{
 			q: 'foo',
-			facetInclude: { tags: [ 'cats' ] },
-			facetExclude: { tags: [ 'dogs' ] },
+			facetMustMatch: { tags: [ 'cats' ] },
+			facetMustNotMatch: { tags: [ 'dogs' ] },
 		},
 	)
 	assert.equal(
 		fromQuery(new URL(`https://site.com?q=foo&${encodeURIComponent('facets[tags]')}=${encodeURIComponent('cats,-dogs')}`).searchParams),
 		{
 			q: 'foo',
-			facetInclude: { tags: [ 'cats' ] },
-			facetExclude: { tags: [ 'dogs' ] },
+			facetMustMatch: { tags: [ 'cats' ] },
+			facetMustNotMatch: { tags: [ 'dogs' ] },
 		},
 	)
 	assert.equal(
-		fromQuery({ sort: 'anything' }),
-		{ sort: 'anything' },
-		'the sort property is passed along',
+		fromQuery({ sort: 'foo,-bar,fizz' }),
+		{
+			sort: [
+				{ key: 'foo', descending: false },
+				{ key: 'bar', descending: true },
+				{ key: 'fizz', descending: false },
+			],
+		},
+		'the comma separated sort list is converted',
 	)
 	assert.equal(
-		fromQuery({ sort: 3 }),
-		{ sort: 3 },
-		'it is untouched so your earlier changes will stick around',
+		fromQuery({ 'include[fields]': 'foo,bar' }),
+		{ includeFields: [ 'foo', 'bar' ] },
 	)
-
+	assert.equal(
+		fromQuery({ 'include[facets]': 'foo,bar' }),
+		{ includeFacets: [ 'foo', 'bar' ] },
+	)
 	assert.throws(
 		() => fromQuery({ 'page[size]': '-3' }),
 		/The parameter "page\[size]" must be an integer greater or equal to zero/,
@@ -70,8 +78,8 @@ test('turn query parameters into a hunch query', () => {
 			'facets',
 			{ 'facets[tags]': 'cats,-dogs' },
 			{
-				facetInclude: { tags: [ 'cats' ] },
-				facetExclude: { tags: [ 'dogs' ] },
+				facetMustMatch: { tags: [ 'cats' ] },
+				facetMustNotMatch: { tags: [ 'dogs' ] },
 			},
 		],
 		[
