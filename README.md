@@ -15,6 +15,7 @@ Hunch supports these search features:
 - Search suggestions [docs](https://hunchjs.com/docs/searching#suggest)
 - Boosting metadata properties [docs](https://hunchjs.com/docs/searching#boost)
 - Ranking [docs](https://hunchjs.com/docs/searching#score)
+- Facet Limiting [docs](https://hunchjs.com/docs/searching#return-specific-facets)
 - Facet Matching [docs](https://hunchjs.com/docs/searching#facet-matching)
 - Pagination [docs](https://hunchjs.com/docs/searching#pagination)
 - Stop-Words [docs](https://hunchjs.com/docs/searching#stop-words)
@@ -65,7 +66,7 @@ Then you create a search instance using Hunch, and query it:
 
 ```js
 import { hunch } from 'hunch'
-const search = hunch(index)
+const search = hunch({ index })
 const results = search({ q: 'we get signal' })
 /*
 results = {
@@ -137,17 +138,17 @@ To make a search using this index, you would create a Hunch instance with the in
 ```js
 // Load the generated JSON file in one way or another:
 import { readFile } from 'node:fs/promises'
-const data = JSON.parse(await readFile('./dist/hunch.json'))
+const index = JSON.parse(await readFile('./dist/hunch.json'))
 
 // Create an instance of Hunch using that data:
 import { hunch } from 'hunch'
-const search = hunch({ data })
+const search = hunch({ index })
 
 // Then query it:
 const results = search({
   q: 'fancy words',
-  facetInclude: { tags: [ 'cats' ] },
-  facetExclude: { tags: [ 'rabbits' ] },
+  facetMustMatch: { tags: [ 'cats' ] },
+  facetMustNotMatch: { tags: [ 'rabbits' ] },
 })
 /*
 results = {
@@ -168,26 +169,22 @@ results = {
     total: 1,
   },
   facets: {
-    series: [
-      {
-        key: 'Animals',
-        count: 1,
+    series: {
+      Animals: {
+        all: 3,
+        search: 1,
       },
-    ],
-    tags: [
-      {
-        key: 'cats',
-        count: 1,
-      },
-      {
-        key: 'dogs',
-        count: 1,
-      },
-      {
-        key: 'rabbits',
-        count: 0,
-      },
-    ],
+    },
+    tags: {
+      cats: {
+        all: 5,
+        search: 1
+      }
+      dogs: {
+        all: 3,
+        search: 1
+      }
+    },
   },
 }
 */
@@ -201,7 +198,7 @@ If you are using Hunch as an API with a URL query parameter interface, such as A
 // from the main
 import { fromQuery } from 'hunch'
 // or from the named export
-// import { fromQuery } from 'hunch/from-query'
+import { fromQuery } from 'hunch/from-query'
 const query = normalize({
   q: 'fancy words',
   'facet[tags]': 'cats,-rabbits',
@@ -209,8 +206,8 @@ const query = normalize({
 /*
 query = {
   q: 'fancy words',
-  facetInclude: { tags: [ 'cats' ] },
-  facetExclude: { tags: [ 'rabbits' ] },
+  facetMustMatch: { tags: [ 'cats' ] },
+  facetMustNotMatch: { tags: [ 'rabbits' ] },
 }
 */
 ```
@@ -222,7 +219,6 @@ Behind the scenes this libary uses [MiniSearch](https://github.com/lucaong/minis
 ⚠️ The output JSON file is an amalgamation of a MiniSearch index and other settings, optimized to save space. There is **no guarantee** as to the output structure or contents between Hunch versions: you **must** compile with the same version that you search with!
 
 Some things left to do:
-- [ ] A way to get the list and counts for facets (I'm working on this)
 - [ ] Stemming (undecided if I'll support this...)
 
 ## License
