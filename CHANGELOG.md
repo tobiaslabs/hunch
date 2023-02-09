@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0
+
+### Minor Changes
+
+- aecbe72: Add functionality for inclusive facet matching.
+
+### Patch Changes
+
+- f828d9e: Fix docs to match now that Hunch has settled down.
+
 ## 0.5.0
 
 ### Minor Changes
