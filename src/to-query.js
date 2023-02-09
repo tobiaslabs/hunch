@@ -2,7 +2,7 @@
  * Given a HunchJS query parameter object, return a URL-safe string
  * containing those query parameters. For example:
  *
- *   { pageSize: 3, q: "why? because!", facetInclude: { tags: [ "cats", "dogs" ] } }
+ *   { pageSize: 3, q: "why? because!", facetMustMatch: { tags: [ "cats", "dogs" ] } }
  *   =>
  *   "page%5Bsize%5D=3&q=why%3F%20because!&facets%5Btags%5D=cats%2Cdogs"
  *
@@ -18,6 +18,7 @@ export const toQuery = query => {
 	if (query.suggest) out.suggest = 'true'
 	if (query.fields?.length) out.fields = query.fields.join(',')
 	if (query.includeFields?.length) out['include[fields]'] = query.includeFields.join(',')
+	if (query.includeFacets?.length) out['include[facets]'] = query.includeFacets.join(',')
 
 	if (Array.isArray(query.sort) && query.sort.length)
 		out.sort = query.sort.map(({ key, descending }) => `${descending ? '-' : ''}${key}`).join(',')
@@ -38,10 +39,10 @@ export const toQuery = query => {
 			? `${out[flatKey]},${prefix}${value}`
 			: `${prefix}${value}`
 	}
-	for (const deepKey of [ 'facetInclude', 'facetExclude' ])
+	for (const deepKey of [ 'facetMustMatch', 'facetMustNotMatch' ])
 		if (query[deepKey])
 			for (const propKey in query[deepKey])
-				addFacet(propKey, query[deepKey][propKey].toString(), deepKey === 'facetExclude')
+				addFacet(propKey, query[deepKey][propKey].toString(), deepKey === 'facetMustNotMatch')
 
 	let params = []
 	for (const key of Object.keys(out).sort()) params.push(`${encodeURIComponent(key)}=${encodeURIComponent(out[key])}`)

@@ -33,9 +33,10 @@ const castToUniqueStrings = string => ([
  * @param {number} [pageOffset] - The zero-index number of pagination offsets to use in the search. (Integer. Default: none)
  * @param {number} [pageSize] - The number of items per pagination. (Integer. Default: none)
  * @param {Object<string,number>} [boost] - The metadata key to boost by some value greater than 1. (Float. Default: 1)
- * @param {Object<string,Array<string>>} [facetInclude] - Constrain the search results to records containing metadata with exact values.
- * @param {Object<string,Array<string>>} [facetExclude] - Constrain the search results to records that does not contain metadata with exact values.
+ * @param {Object<string,Array<string>>} [facetMustMatch] - Constrain the search results to records containing facets with exact values.
+ * @param {Object<string,Array<string>>} [facetMustNotMatch] - Constrain the search results to records that do not contain facets with exact values.
  * @param {Array<string>} [includeFields] - A list of fields to include on search results. (Default: all fields are returned.)
+ * @param {Array<string>} [includeFacets] - A list of facets to include on search results. Use `*` for all facets. (Default: only facets found in search results.)
  */
 
 /**
@@ -86,17 +87,19 @@ export const fromQuery = params => {
 			const values = castToUniqueStrings(params[key])
 			for (const val of values) {
 				if (val[0] === '-') {
-					parsed.facetExclude = parsed.facetExclude || {}
-					parsed.facetExclude[child] = parsed.facetExclude[child] || []
-					parsed.facetExclude[child].push(val.substring(1))
+					parsed.facetMustNotMatch = parsed.facetMustNotMatch || {}
+					parsed.facetMustNotMatch[child] = parsed.facetMustNotMatch[child] || []
+					parsed.facetMustNotMatch[child].push(val.substring(1))
 				} else {
-					parsed.facetInclude = parsed.facetInclude || {}
-					parsed.facetInclude[child] = parsed.facetInclude[child] || []
-					parsed.facetInclude[child].push(val)
+					parsed.facetMustMatch = parsed.facetMustMatch || {}
+					parsed.facetMustMatch[child] = parsed.facetMustMatch[child] || []
+					parsed.facetMustMatch[child].push(val)
 				}
 			}
 		} else if (parent === 'include' && child === 'fields') {
 			parsed.includeFields = castToUniqueStrings(params[key])
+		} else if (parent === 'include' && child === 'facets') {
+			parsed.includeFacets = castToUniqueStrings(params[key])
 		}
 	}
 

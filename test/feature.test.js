@@ -11,7 +11,7 @@ const CWD = process.cwd()
 const features = [
 	'boost',
 	'by-id',
-	'facet',
+	'facet-matching',
 	'full-text-lookup',
 	'fuzzy-search',
 	'get-facets',

@@ -11,16 +11,16 @@ test('turn query parameters into a hunch query', () => {
 		}),
 		{
 			q: 'foo',
-			facetInclude: { tags: [ 'cats' ] },
-			facetExclude: { tags: [ 'dogs' ] },
+			facetMustMatch: { tags: [ 'cats' ] },
+			facetMustNotMatch: { tags: [ 'dogs' ] },
 		},
 	)
 	assert.equal(
 		fromQuery(new URL(`https://site.com?q=foo&${encodeURIComponent('facets[tags]')}=${encodeURIComponent('cats,-dogs')}`).searchParams),
 		{
 			q: 'foo',
-			facetInclude: { tags: [ 'cats' ] },
-			facetExclude: { tags: [ 'dogs' ] },
+			facetMustMatch: { tags: [ 'cats' ] },
+			facetMustNotMatch: { tags: [ 'dogs' ] },
 		},
 	)
 	assert.equal(
@@ -37,6 +37,10 @@ test('turn query parameters into a hunch query', () => {
 	assert.equal(
 		fromQuery({ 'include[fields]': 'foo,bar' }),
 		{ includeFields: [ 'foo', 'bar' ] },
+	)
+	assert.equal(
+		fromQuery({ 'include[facets]': 'foo,bar' }),
+		{ includeFacets: [ 'foo', 'bar' ] },
 	)
 	assert.throws(
 		() => fromQuery({ 'page[size]': '-3' }),
@@ -74,8 +78,8 @@ test('turn query parameters into a hunch query', () => {
 			'facets',
 			{ 'facets[tags]': 'cats,-dogs' },
 			{
-				facetInclude: { tags: [ 'cats' ] },
-				facetExclude: { tags: [ 'dogs' ] },
+				facetMustMatch: { tags: [ 'cats' ] },
+				facetMustNotMatch: { tags: [ 'dogs' ] },
 			},
 		],
 		[

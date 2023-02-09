@@ -15,7 +15,7 @@ Hunch supports these search features:
 - Search suggestions [docs](https://hunchjs.com/docs/searching#suggest)
 - Boosting metadata properties [docs](https://hunchjs.com/docs/searching#boost)
 - Ranking [docs](https://hunchjs.com/docs/searching#score)
-- Facets [docs](https://hunchjs.com/docs/searching#facet)
+- Facet Matching [docs](https://hunchjs.com/docs/searching#facet-matching)
 - Pagination [docs](https://hunchjs.com/docs/searching#pagination)
 - Stop-Words [docs](https://hunchjs.com/docs/searching#stop-words)
 - Sort by alternate strategy [docs](https://hunchjs.com/docs/searching#sort)

@@ -13,8 +13,8 @@ test('turn query parameters into a hunch query', () => {
 	assert.equal(
 		toQuery({
 			q: 'foo',
-			facetInclude: { tags: [ 'cats' ] },
-			facetExclude: { tags: [ 'dogs' ] },
+			facetMustMatch: { tags: [ 'cats' ] },
+			facetMustNotMatch: { tags: [ 'dogs' ] },
 		}),
 		toString({
 			q: 'foo',
@@ -36,8 +36,8 @@ test('turn query parameters into a hunch query', () => {
 		[
 			'facets',
 			{
-				facetInclude: { tags: [ 'cats' ] },
-				facetExclude: { tags: [ 'dogs' ] },
+				facetMustMatch: { tags: [ 'cats' ] },
+				facetMustNotMatch: { tags: [ 'dogs' ] },
 			},
 			{ 'facets[tags]': 'cats,-dogs' },
 		],
@@ -95,6 +95,11 @@ test('turn query parameters into a hunch query', () => {
 			'include fields',
 			{ includeFields: [ 'foo', 'bar' ] },
 			{ 'include[fields]': 'foo,bar' },
+		],
+		[
+			'include facets',
+			{ includeFacets: [ 'foo', 'bar' ] },
+			{ 'include[facets]': 'foo,bar' },
 		],
 	]
 	for (const [ label, query, expected ] of testEveryProperty)
