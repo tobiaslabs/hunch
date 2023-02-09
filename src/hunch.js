@@ -23,28 +23,44 @@ const shouldExitEarlyForEmptySet = ({ query, facets, searchableFields }) => {
 }
 
 const filterDocuments = (searchResults, query) => {
-	const must = query.facetMustMatch || {}
+	const mustAll = query.facetMustMatch || {}
+	const mustAny = query.facetMustMatchAny || {}
 	const mustNot = query.facetMustNotMatch || {}
 	return searchResults.filter(document => {
-		let matches = true
-		for (const name in must) {
-			if (!document[name]) matches = false
-			else for (const value of must[name]) {
+		for (const name in mustAll) {
+			if (!document[name]) return false
+			else for (const value of mustAll[name]) {
 				if (Array.isArray(document[name])) {
-					if (!document[name].includes(value)) matches = false
+					if (!document[name].includes(value)) return false
 				} else if (document[name] !== value) {
-					matches = false
+					return false
 				}
 			}
 		}
-		for (const name in mustNot) for (const value of mustNot[name]) {
-			if (Array.isArray(document[name])) {
-				if (document[name].includes(value)) matches = false
-			} else if (document[name] === value) {
-				matches = false
+
+		for (const name in mustNot)
+			for (const value of mustNot[name]) {
+				if (Array.isArray(document[name])) {
+					if (document[name].includes(value)) return false
+				} else if (document[name] === value) {
+					return false
+				}
 			}
-		}
-		return matches
+
+		for (const name in mustAny)
+			for (const value of mustAny[name]) {
+				if (Array.isArray(document[name])) {
+					if (document[name].includes(value)) return true
+				} else if (document[name] === value) {
+					return true
+				}
+			}
+
+		// The must-any short circuits true if any are
+		// found, so if we're here it didn't short circuit
+		// and therefore we just need to make sure that
+		// there aren't any must-any keys required.
+		return !Object.keys(mustAny).length
 	})
 }
 
@@ -248,7 +264,7 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 				})
 			})
 
-		if (query.facetMustMatch || query.facetMustNotMatch) searchResults = filterDocuments(searchResults, query)
+		if (query.facetMustMatch || query.facetMustNotMatch || query.facetMustMatchAny) searchResults = filterDocuments(searchResults, query)
 
 		searchResults = prePaginationSort({ items: searchResults, query })
 		if (query.includeFields?.length) searchResults = removeFieldsNotIncluded(searchResults, query.includeFields)

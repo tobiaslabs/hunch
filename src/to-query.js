@@ -1,3 +1,9 @@
+const FACET_MATCHERS = {
+	facetMustMatch: '',
+	facetMustMatchAny: '~',
+	facetMustNotMatch: '-',
+}
+
 /**
  * Given a HunchJS query parameter object, return a URL-safe string
  * containing those query parameters. For example:
@@ -32,17 +38,16 @@ export const toQuery = query => {
 			for (const propKey in query[deepKey])
 				out[`${deepKey}[${propKey}]`] = query[deepKey][propKey].toString()
 
-	const addFacet = (facetName, value, exclude) => {
+	const addFacet = (facetName, value, prefix) => {
 		const flatKey = `facets[${facetName}]`
-		const prefix = exclude ? '-' : ''
 		out[flatKey] = out[flatKey]
 			? `${out[flatKey]},${prefix}${value}`
 			: `${prefix}${value}`
 	}
-	for (const deepKey of [ 'facetMustMatch', 'facetMustNotMatch' ])
-		if (query[deepKey])
-			for (const propKey in query[deepKey])
-				addFacet(propKey, query[deepKey][propKey].toString(), deepKey === 'facetMustNotMatch')
+	for (const match in FACET_MATCHERS)
+		if (query[match])
+			for (const propKey in query[match])
+				addFacet(propKey, query[match][propKey].toString(), FACET_MATCHERS[match])
 
 	let params = []
 	for (const key of Object.keys(out).sort()) params.push(`${encodeURIComponent(key)}=${encodeURIComponent(out[key])}`)
