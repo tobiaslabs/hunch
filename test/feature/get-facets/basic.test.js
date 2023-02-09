@@ -9,13 +9,13 @@ export default ({ assert, hunch, index }) => [
 				page: { items: 4, size: 0 },
 				facets: {
 					tags: {
-						dogs: 2,
-						cats: 2,
-						rabbits: 1,
+						dogs: { all:2, search:2 },
+						cats: { all:2, search:2 },
+						rabbits: { all:1, search:1 },
 					},
 					series: {
-						Animals: 2,
-						'Fluffy Things': 1,
+						Animals: { all:2, search:2 },
+						'Fluffy Things': { all: 1, search: 1 },
 					},
 				},
 			},
@@ -44,13 +44,13 @@ export default ({ assert, hunch, index }) => [
 				page: { items: 4, offset: 0, pages: 4, size: 1 },
 				facets: {
 					tags: {
-						dogs: 2,
-						cats: 2,
-						rabbits: 1,
+						dogs: { all:2, search:2 },
+						cats: { all:2, search:2 },
+						rabbits: { all:1, search:1 },
 					},
 					series: {
-						Animals: 2,
-						'Fluffy Things': 1,
+						Animals: { all:2, search:2 },
+						'Fluffy Things': { all:1, search:1 },
 					},
 				},
 			},

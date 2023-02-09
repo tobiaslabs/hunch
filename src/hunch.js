@@ -257,7 +257,11 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 		const addToFacets = (facet, key) => {
 			out.facets = out.facets || {}
 			out.facets[facet] = out.facets[facet] || {}
-			out.facets[facet][key] = (out.facets[facet][key] || 0) + 1
+			out.facets[facet][key] = out.facets[facet][key] || {
+				all: facets[facet]?.get?.(key)?.length || 0,
+				search: 0,
+			}
+			out.facets[facet][key].search++
 		}
 		const facetNames = query.includeFields?.length
 			? query.includeFields.filter(f => facets[f])

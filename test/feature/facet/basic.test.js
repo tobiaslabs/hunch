@@ -25,8 +25,8 @@ export default ({ assert, hunch, index }) => [
 				page: { items: 2, offset: 0, pages: 1, size: 15 },
 				facets: {
 					tags: {
-						dogs: 1,
-						cats: 2,
+						dogs: { all: 2, search: 1 },
+						cats: { all: 2, search: 2 },
 					},
 				},
 			},
@@ -53,7 +53,7 @@ export default ({ assert, hunch, index }) => [
 				page: { items: 1, offset: 0, pages: 1, size: 15 },
 				facets: {
 					tags: {
-						cats: 1,
+						cats: { all: 2, search: 1 },
 					},
 				},
 			},
