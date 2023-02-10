@@ -47,7 +47,8 @@ export const toQuery = query => {
 	for (const match in FACET_MATCHERS)
 		if (query[match])
 			for (const propKey in query[match])
-				addFacet(propKey, query[match][propKey].toString(), FACET_MATCHERS[match])
+				for (const value of query[match][propKey])
+					addFacet(propKey, value.toString(), FACET_MATCHERS[match])
 
 	let params = []
 	for (const key of Object.keys(out).sort()) params.push(`${encodeURIComponent(key)}=${encodeURIComponent(out[key])}`)

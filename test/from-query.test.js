@@ -77,10 +77,20 @@ test('turn query parameters into a hunch query', () => {
 		],
 		[
 			'facets',
-			{ 'facets[tags]': 'cats,-dogs' },
+			{ 'facets[tags]': 'cats,~rabbits,-dogs' },
 			{
 				facetMustMatch: { tags: [ 'cats' ] },
+				facetMustMatchAny: { tags: [ 'rabbits' ] },
 				facetMustNotMatch: { tags: [ 'dogs' ] },
+			},
+		],
+		[
+			'facets with multiple values',
+			{ 'facets[tags]': 'cats,felines,~rabbits,~squirrels,-dogs,-wolves' },
+			{
+				facetMustMatch: { tags: [ 'cats', 'felines' ] },
+				facetMustMatchAny: { tags: [ 'rabbits', 'squirrels' ] },
+				facetMustNotMatch: { tags: [ 'dogs', 'wolves' ] },
 			},
 		],
 		[

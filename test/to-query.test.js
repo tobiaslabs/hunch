@@ -9,20 +9,48 @@ const toString = obj => {
 	return params.join('&')
 }
 
-test('turn query parameters into a hunch query', () => {
+test('every query parameter all at once', () => {
 	assert.equal(
 		toQuery({
 			q: 'foo',
-			facetMustMatch: { tags: [ 'cats' ] },
-			facetMustMatchAny: { tags: [ 'rabbits' ] },
-			facetMustNotMatch: { tags: [ 'dogs' ] },
+			boost: { title: 2, summary: 3 },
+			facetMustMatch: { tags: [ 'cats', 'felines' ] },
+			facetMustMatchAny: { tags: [ 'rabbits', 'squirrels' ] },
+			facetMustNotMatch: { tags: [ 'dogs', 'wolves' ] },
+			fields: [ 'title', 'summary' ],
+			fuzzy: 0.8,
+			includeFacets: [ 'foo', 'bar' ],
+			includeFields: [ 'foo', 'bar' ],
+			pageSize: 4,
+			pageOffset: 2,
+			prefix: true,
+			snippet: { content: 50 },
+			sort: [
+				{ key: 'foo', descending: false },
+				{ key: 'bar', descending: true },
+			],
+			suggest: true,
 		}),
 		toString({
 			q: 'foo',
-			'facets[tags]': 'cats,~rabbits,-dogs',
+			'boost[title]': '2',
+			'boost[summary]': '3',
+			'facets[tags]': 'cats,felines,~rabbits,~squirrels,-dogs,-wolves',
+			'fields': 'title,summary',
+			fuzzy: '0.8',
+			'include[facets]': 'foo,bar',
+			'include[fields]': 'foo,bar',
+			'page[size]': '4',
+			'page[offset]': '2',
+			prefix: 'true',
+			'snippet[content]': '50',
+			sort: 'foo,-bar',
+			suggest: 'true',
 		}),
 	)
+})
 
+test('specific query parameter scenarios', () => {
 	const testEveryProperty = [
 		[
 			'boost',
@@ -42,6 +70,15 @@ test('turn query parameters into a hunch query', () => {
 				facetMustNotMatch: { tags: [ 'dogs' ] },
 			},
 			{ 'facets[tags]': 'cats,~rabbits,-dogs' },
+		],
+		[
+			'facets with multiple values',
+			{
+				facetMustMatch: { tags: [ 'cats', 'felines' ] },
+				facetMustMatchAny: { tags: [ 'rabbits', 'squirrels' ] },
+				facetMustNotMatch: { tags: [ 'dogs', 'wolves' ] },
+			},
+			{ 'facets[tags]': 'cats,felines,~rabbits,~squirrels,-dogs,-wolves' },
 		],
 		[
 			'full text lookup',
