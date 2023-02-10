@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1
+
+### Patch Changes
+
+- a26cbca: Query serializer was not handling multiple facet match exclude/match-any values.
+
 ## 0.6.0
 
 ### Minor Changes
