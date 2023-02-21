@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.0
+
+### Minor Changes
+
+- dd20cda: Prettify logged query parameters when running local dev server.
+- 04dc1a6: You can set `--delay N` when using `--serve` to simulate slow network responses.
+- 27fedf4: Add ability to filter with quotation marks describing exact matches.
+
+### Patch Changes
+
+- e0b15e8: Add tests for very large data sets to validate performance is acceptable.
+
 ## 0.6.1
 
 ### Patch Changes
