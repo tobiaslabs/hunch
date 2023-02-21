@@ -26,7 +26,7 @@ const build = async ({ cwd, indent, opts, outputFilepath, verbose }) => {
 	return outputData
 }
 
-const run = async ({ config, cwd, indent, serve, verbose, watch }) => new Promise(
+const run = async ({ config, cwd, delay, indent, serve, verbose, watch }) => new Promise(
 	(resolvePromise, rejectPromise) => import(config)
 		.then(({ default: opts }) => {
 			const port = typeof serve === 'number' ? serve : 9001
@@ -45,7 +45,7 @@ const run = async ({ config, cwd, indent, serve, verbose, watch }) => new Promis
 						const rebuildIndex = () => {
 							console.log('Rebuilding index, one moment...')
 							build({ cwd, indent, opts, outputFilepath, serve, verbose })
-								.then(index => { if (serve) startServer({ port, index }) })
+								.then(index => { if (serve) startServer({ port, index, delay }) })
 								.catch(error => {
 									console.error('Error while building index:', error)
 								})
@@ -58,7 +58,7 @@ const run = async ({ config, cwd, indent, serve, verbose, watch }) => new Promis
 					} else {
 						build({ cwd, indent, opts, outputFilepath, serve, verbose })
 							.then(index => {
-								if (serve) startServer({ port, index })
+								if (serve) startServer({ port, index, delay })
 								else resolvePromise()
 							})
 					}
@@ -75,6 +75,7 @@ cli
 	.describe('Compiled search for your static Markdown files.')
 	.option('-c, --config', 'Path to configuration file.', 'hunch.config.js')
 	.option('--cwd', 'Set the current working directory somewhere else.')
+	.option('--delay', 'When serving locally, introduce some milliseconds of delay on HTTP requests to simulate network delays.')
 	.option('--indent', 'Indent the output JSON, typically for debugging purposes.')
 	.option('--serve', 'Start a search server using canonical query parameters. (Default port: 9001)')
 	.option('--verbose', 'Print additional information during build.')
@@ -83,13 +84,13 @@ cli
 	.example('-c hunch.config.js')
 	.example('--config hunch.config.js --cwd ../../ --indent --verbose')
 	.example('--serve 8080 # change the port')
-	.action(({ config, cwd, indent, serve, verbose, watch }) => {
+	.action(({ config, cwd, delay, indent, serve, verbose, watch }) => {
 		cwd = cwd || process.cwd()
 		if (!isAbsolute(cwd)) cwd = resolve(cwd)
 		if (typeof config !== 'string') config = 'hunch.config.js'
 		if (!isAbsolute(config)) config = resolve(config)
 		const start = Date.now()
-		run({ config, cwd, indent, serve, verbose, watch })
+		run({ config, cwd, delay: parseInt(delay, 10) || 0, indent, serve, verbose, watch })
 			.then(() => {
 				console.log(`Hunch completed in ${humanTime(Date.now() - start)}.`)
 				process.exit(0)
