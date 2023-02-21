@@ -28,6 +28,7 @@ const features = namedFeature
 		'get-facets',
 		'pagination',
 		'prefix',
+		'quoted-search',
 		'return-specific-facets',
 		'return-specific-fields',
 		'score',

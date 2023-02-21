@@ -2,6 +2,7 @@ import MiniSearch from 'minisearch'
 
 import { unpack } from './utils/unpack.js'
 import { getOutputWithPagination } from './utils/pagination.js'
+import { filterForMatchingPhrases } from './utils/filter-for-matching-phrases.js'
 
 const EMPTY_RESULTS = {
 	items: [],
@@ -200,6 +201,7 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 		let searchResults = []
 
 		if (!mini && (query.q || query.suggest)) init()
+
 		if (query.suggest) {
 			return {
 				suggestions: mini
@@ -215,6 +217,7 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 			// the MiniSearch properties, so we can direct copy.
 			for (const key of [ 'boost', 'fields', 'fuzzy', 'prefix' ]) if (query[key]) miniOptions[key] = query[key]
 			searchResults = mini.search(query.q, miniOptions)
+			if (query.q.includes('"') || query.q.includes("'")) searchResults = filterForMatchingPhrases(query.q, searchResults)
 		} else {
 			// loading *all* documents, but only the first chunk
 			for (const documentId in miniSearch.documentIds) {
