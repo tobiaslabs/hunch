@@ -14,3 +14,4 @@ globbed-*.js
 /dist
 /demo/build
 /test/feature/*/build
+/test/feature/huge-text-search/content-basic

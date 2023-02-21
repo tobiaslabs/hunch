@@ -26,6 +26,7 @@ const features = namedFeature
 		'full-text-lookup',
 		'fuzzy-search',
 		'get-facets',
+		'huge-text-search',
 		'pagination',
 		'prefix',
 		'quoted-search',
