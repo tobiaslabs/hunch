@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.1
+
+### Patch Changes
+
+- 77d06f8: Rename the "quoted-search" test to "exact-phrase".
+- 882f0fa: Small update to the server logs to look nicer.
+- a78143d: Fixed unpacking algorithm for multiple chunks.
+- a917b9d: Add demo test for how multiple chunks are searched.
+
 ## 0.7.0
 
 ### Minor Changes
