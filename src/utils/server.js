@@ -6,13 +6,14 @@ import { hunch } from '../hunch.js'
 
 const prettify = url => {
 	let [ pre, query ] = url.split('?')
+	query = query || ''
 	const parts = []
 	for (const chunk of query.split('&')) {
 		const [ key, value ] = chunk.split('=')
 		parts.push(`${decodeURIComponent(key)}=${decodeURIComponent(value)}`)
 	}
 	query = parts.sort().join('&')
-	return pre + '?' + query
+	return pre + (query ? ('?' + query) : '')
 }
 
 const HOSTNAME = '127.0.0.1'
