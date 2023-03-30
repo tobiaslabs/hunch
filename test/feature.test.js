@@ -22,6 +22,7 @@ const features = namedFeature
 	:[
 		'boost',
 		'by-id',
+		'exact-phrase',
 		'facet-matching',
 		'full-text-lookup',
 		'fuzzy-search',
@@ -29,7 +30,6 @@ const features = namedFeature
 		'huge-text-search',
 		'pagination',
 		'prefix',
-		'quoted-search',
 		'return-specific-facets',
 		'return-specific-fields',
 		'score',
