@@ -27,7 +27,6 @@ for (const bookFileName of bibleBookFileNames) {
 	for (const { type, chapterNumber, value } of book) {
 		if (chapterNumber && chapterNumber !== currentChapterNumber) {
 			if (currentChapterNumber && chapterCollector) {
-				console.log(`Writing chapter ${currentChapterNumber} of ${bookFileName}`)
 				await writeFile(join(bookDir, `chapter-${currentChapterNumber}.md`), chapterCollector, 'utf8')
 			}
 			currentChapterNumber = chapterNumber

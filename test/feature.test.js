@@ -28,6 +28,7 @@ const features = namedFeature
 		'fuzzy-search',
 		'get-facets',
 		'huge-text-search',
+		'multiple-chunks',
 		'pagination',
 		'prefix',
 		'return-specific-facets',
