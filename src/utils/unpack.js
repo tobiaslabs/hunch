@@ -58,7 +58,11 @@ export const unpack = ({
 		searchableFields: searchableFields || [],
 		_minisearchOptions: _minisearchOptions || {},
 	}
-	for (const fileId in fileIdToDocumentIds) unpacked.chunkIdToFileIndex[miniSearch.documentIds[fileIdToDocumentIds[fileId]]] = fileId
+	for (const fileId in fileIdToDocumentIds) {
+		for (const documentId of fileIdToDocumentIds[fileId]) {
+			unpacked.chunkIdToFileIndex[miniSearch.documentIds[documentId]] = fileId
+		}
+	}
 
 	if (stopWords?.length) {
 		const words = new Set(stopWords)
