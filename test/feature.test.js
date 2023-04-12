@@ -39,6 +39,7 @@ const features = namedFeature
 		'sort',
 		'stop-words',
 		'stored-fields',
+		'tokenize-block-content',
 		'suggest',
 	]
 
