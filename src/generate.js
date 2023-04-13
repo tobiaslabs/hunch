@@ -24,7 +24,7 @@ export const generate = async options => {
 		facets,
 		glob: globString,
 		normalizeMetadata,
-		tokenizeBlockContent,
+		formatBlockContent,
 		preFilter,
 		processedFilter,
 		searchableFields,
@@ -45,7 +45,7 @@ export const generate = async options => {
 		.then(files => Promise.all(
 			files
 				.sort() // to make id list deterministic, and for legibility in logs and files-list index
-				.map((file, index) => parseFile({ contentFolder, file, index, normalizeMetadata, tokenizeBlockContent })),
+				.map((file, index) => parseFile({ contentFolder, file, index, normalizeMetadata, formatBlockContent })),
 		))
 		.then(parsed => parsed.filter(processedFilter))
 	if (verbose) for (const { file } of files) console.log('-', file)

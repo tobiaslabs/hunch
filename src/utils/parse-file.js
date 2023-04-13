@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { parse } from '@saibotsivad/blockdown'
 import { load, JSON_SCHEMA } from 'js-yaml'
 
-export const parseFile = async ({ contentFolder: absoluteRootFilepath, file: relativeFilepath, normalizeMetadata, tokenizeBlockContent }) => {
+export const parseFile = async ({ contentFolder: absoluteRootFilepath, file: relativeFilepath, normalizeMetadata, formatBlockContent }) => {
 	const string = await readFile(join(absoluteRootFilepath, relativeFilepath), 'utf8')
 	if (string) {
 		let { blocks } = parse(string)
@@ -11,8 +11,8 @@ export const parseFile = async ({ contentFolder: absoluteRootFilepath, file: rel
 		if (blocks?.length > 1) blocks.shift()
 		if (metadata && normalizeMetadata) metadata = await normalizeMetadata({ metadata, blocks })
 		// tokenization of blocks occurs after metadata normalization
-		if (tokenizeBlockContent) blocks = await Promise
-			.all(blocks.map(block => tokenizeBlockContent(block, metadata)))
+		if (formatBlockContent) blocks = await Promise
+			.all(blocks.map(block => formatBlockContent(block, metadata)))
 		return { metadata, file: relativeFilepath, blocks }
 	}
 }

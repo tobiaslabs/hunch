@@ -24,6 +24,7 @@ const features = namedFeature
 		'by-id',
 		'exact-phrase',
 		'facet-matching',
+		'format-block-content',
 		'full-text-lookup',
 		'fuzzy-search',
 		'get-facets',
@@ -39,7 +40,6 @@ const features = namedFeature
 		'sort',
 		'stop-words',
 		'stored-fields',
-		'tokenize-block-content',
 		'suggest',
 	]
 
