@@ -1,3 +1,4 @@
+import { load, JSON_SCHEMA } from 'js-yaml'
 import { fromMarkdown } from 'mdast-util-from-markdown'
 import { toString } from 'mdast-util-to-string'
 
@@ -39,14 +40,46 @@ const blockNameToParser = {
 		block.content = toString(tree)
 		return block
 	},
+
 	/*
-	Tokenizing a YAML string to be searchable is not often supported, but
-	it definitely makes sense in technical documents. This tokenization
-	method is very rudimentary, but it will result in mostly-searchable
-	YAML content. Again, this removes formatting from the search result,
-	but you're free to explore other tokenization methods as needed.
+	Tokenizing JSON for search is tricky, so it's often unsupported, but
+	if you have a lot of it in your content it can make sense to figure
+	out a way to tokenize it. The method in this demo is very rudimentary,
+	but it will result in semi-searchable content.
+	*/
+	json: (block) => {
+		block.content = block
+			.content
+			.replaceAll(':', ' ')
+			.replaceAll('"', ' ')
+			.replaceAll(',', ' ')
+			.replaceAll('{', ' ')
+			.replaceAll('}', ' ')
+			.replaceAll(/\s+/g, ' ')
+			.trim()
+		return block
+	},
+
+	/*
+	For similar reasons, tokenizing a YAML string to be searchable is
+	often not supported but can be desirable. The tokenization method
+	here is similarly very rudimentary, but shows some ways you can
+	possibly make more information available.
 	*/
 	yaml: (block) => {
+		// One possible solution is to retain the original content, so
+		// you can display it more accurately in your search results:
+		const original = block.content
+		// You could also store a pre-parsed version, so that you don't
+		// need to do the parsing on the client side:
+		const parsed = load(block.content, { schema: JSON_SCHEMA })
+		// Those can be stored in the block's metadata:
+		block.metadata = {
+			...(block.metadata || {}),
+			original,
+			parsed,
+		}
+		// And then finally tokenize the YAML string to make it searchable:
 		block.content = block
 			.content
 			.replaceAll(':', ' ')
