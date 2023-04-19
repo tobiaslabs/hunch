@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0
+
+### Minor Changes
+
+- 75b8d62: Add ability to tokenize content prior to indexing.
+
 ## 0.7.1
 
 ### Patch Changes
