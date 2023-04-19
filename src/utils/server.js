@@ -8,7 +8,7 @@ const prettify = url => {
 	let [ pre, query ] = url.split('?')
 	query = query || ''
 	const parts = []
-	for (const chunk of query.split('&')) {
+	for (const chunk of query.split('&').filter(Boolean)) {
 		const [ key, value ] = chunk.split('=')
 		parts.push(`${decodeURIComponent(key)}=${decodeURIComponent(value)}`)
 	}
