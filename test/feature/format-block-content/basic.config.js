@@ -91,8 +91,8 @@ const blockNameToParser = {
 }
 
 export default {
-	formatBlockContent: async (block, metadata) => {
-		if (blockNameToParser[block.name]) return blockNameToParser[block.name](block, metadata)
+	formatBlock: async ({ block }) => {
+		if (blockNameToParser[block.name]) return blockNameToParser[block.name](block)
 		return block
 	},
 }
