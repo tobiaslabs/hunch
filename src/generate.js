@@ -11,7 +11,7 @@ const DEFAULT_OPTIONS = {
 	glob: '**/*.md',
 	indent: null,
 	preFilter: file => !file.endsWith('.DS_Store'),
-	processedFilter: ({ metadata }) => metadata.published !== false && (!metadata.published?.getTime || metadata.published.getTime() > Date.now()),
+	filterFile: ({ metadata }) => metadata.published !== false && (!metadata.published?.getTime || metadata.published.getTime() > Date.now()),
 	facets: [],
 	searchableFields: [],
 	storedFields: [],
@@ -26,7 +26,7 @@ export const generate = async options => {
 		formatMetadata,
 		formatBlock,
 		preFilter,
-		processedFilter,
+		filterFile,
 		searchableFields,
 		stopWords,
 		storedFields,
@@ -48,7 +48,7 @@ export const generate = async options => {
 				.sort() // to make id list deterministic, and for legibility in logs and files-list index
 				.map((file, index) => parseFile({ contentFolder, file, index, formatMetadata, formatBlock, yamlOptions })),
 		))
-		.then(parsed => parsed.filter(processedFilter))
+		.then(parsed => parsed.filter(filterFile))
 	if (verbose) for (const { file } of files) console.log('-', file)
 	const filesList = files.map(f => f.file)
 	console.log(`Parsed ${files.length} content files.`)
