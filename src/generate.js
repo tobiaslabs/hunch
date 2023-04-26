@@ -23,7 +23,7 @@ export const generate = async options => {
 		cwd,
 		facets,
 		glob: globString,
-		normalizeMetadata,
+		formatMetadata,
 		formatBlock,
 		preFilter,
 		processedFilter,
@@ -31,6 +31,7 @@ export const generate = async options => {
 		stopWords,
 		storedFields,
 		verbose,
+		yamlOptions,
 		_minisearchOptions,
 	} = Object.assign({}, DEFAULT_OPTIONS, options || {})
 
@@ -45,7 +46,7 @@ export const generate = async options => {
 		.then(files => Promise.all(
 			files
 				.sort() // to make id list deterministic, and for legibility in logs and files-list index
-				.map((file, index) => parseFile({ contentFolder, file, index, normalizeMetadata, formatBlock })),
+				.map((file, index) => parseFile({ contentFolder, file, index, formatMetadata, formatBlock, yamlOptions })),
 		))
 		.then(parsed => parsed.filter(processedFilter))
 	if (verbose) for (const { file } of files) console.log('-', file)
