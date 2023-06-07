@@ -7,7 +7,7 @@ export const parseFile = async ({
 	contentFolder: absoluteRootFilepath,
 	file: relativeFilepath,
 	formatMetadata,
-	formatBlock,
+	formatBlockMetadata,
 	yamlOptions,
 }) => {
 	const string = await readFile(join(absoluteRootFilepath, relativeFilepath), 'utf8')
@@ -17,7 +17,15 @@ export const parseFile = async ({
 			&& load(blocks[0].content, { schema: JSON_SCHEMA, ...(yamlOptions || {}) })
 		if (blocks?.length > 1) blocks.shift()
 		if (metadata && formatMetadata) metadata = await formatMetadata({ metadata, blocks })
-		if (formatBlock) blocks = await Promise.all(blocks.map(block => formatBlock({ block })))
+		if (formatBlockMetadata) blocks = (
+			await Promise.all(blocks.map(
+				block => formatBlockMetadata({ block, file: relativeFilepath, metadata, blocks })
+					.then(m => {
+						block.metadata = m
+						return block
+					}),
+			))
+		).flat().filter(Boolean)
 		return { metadata, file: relativeFilepath, blocks }
 	}
 }

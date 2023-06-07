@@ -1,18 +1,23 @@
-import { cwd as currentWorkingDirectory } from 'node:process'
 import { isAbsolute, resolve } from 'node:path'
-import glob from 'tiny-glob'
+import { cwd as currentWorkingDirectory } from 'node:process'
 import MiniSearch from 'minisearch'
+import glob from 'tiny-glob'
 
+import { finalizeRecord } from './utils/finalize-record.js'
 import { makeChunks } from './utils/make-chunks.js'
 import { pack } from './utils/pack.js'
 import { parseFile } from './utils/parse-file.js'
+import { prepareBlock } from './utils/prepare-block.js'
 
 const DEFAULT_OPTIONS = {
+	facets: [],
+	filterFile: ({ metadata }) => metadata.published !== false
+		&& (!metadata.published?.getTime || metadata.published.getTime() > Date.now()),
+	finalizeRecord,
+	prepareBlock,
 	glob: '**/*.md',
 	indent: null,
 	preFilter: file => !file.endsWith('.DS_Store'),
-	filterFile: ({ metadata }) => metadata.published !== false && (!metadata.published?.getTime || metadata.published.getTime() > Date.now()),
-	facets: [],
 	searchableFields: [],
 	storedFields: [],
 }
@@ -23,14 +28,20 @@ export const generate = async options => {
 		cwd,
 		facets,
 		glob: globString,
+		finalizeRecord,
 		formatMetadata,
-		formatBlock,
+		formatBlockMetadata,
 		preFilter,
+		prepareFilesData,
+		prepareBlock,
 		filterFile,
+		mergeMetadata,
 		searchableFields,
+		saveSite,
 		stopWords,
 		storedFields,
 		verbose,
+		saveFile,
 		yamlOptions,
 		_minisearchOptions,
 	} = Object.assign({}, DEFAULT_OPTIONS, options || {})
@@ -46,20 +57,39 @@ export const generate = async options => {
 		.then(files => Promise.all(
 			files
 				.sort() // to make id list deterministic, and for legibility in logs and files-list index
-				.map((file, index) => parseFile({ contentFolder, file, index, formatMetadata, formatBlock, yamlOptions })),
+				.map((file, index) => parseFile({ contentFolder, file, index, formatMetadata, formatBlockMetadata, yamlOptions })),
 		))
 		.then(parsed => parsed.filter(filterFile))
 	if (verbose) for (const { file } of files) console.log('-', file)
 	const filesList = files.map(f => f.file)
 	console.log(`Parsed ${files.length} content files.`)
 
-	console.log('Processing files.')
+	const site = mergeMetadata && mergeMetadata({ files })
+	if (saveSite) await saveSite({ site })
+	const prepared = prepareFilesData && await prepareFilesData({ files, site })
+
+	console.log(`Processing ${files.length} files.`)
+	const processSingleFile = async ({ metadata, file, blocks }) => {
+		if (prepareBlock) blocks = await Promise.all(blocks.map(
+			block => prepareBlock(block, { file, metadata, blocks, files, site, prepared })
+				.then(data => ({ ...block, data })),
+		))
+		if (saveFile) await saveFile({ file, metadata, blocks, files, site })
+		return finalizeRecord({ file, metadata, blocks, files, site, prepared })
+	}
+
 	const {
 		chunks,
 		chunkIdToFileIndex,
 		chunkMetadata,
 		fileToMetadata,
-	} = makeChunks({ files, searchableFields, verbose })
+	} = makeChunks({
+		files: (
+			await Promise.all(files.map(file => processSingleFile(file)))
+		).filter(Boolean),
+		searchableFields,
+		verbose,
+	})
 
 	const validFacetValue = value => value === undefined
 		|| typeof value === 'string'

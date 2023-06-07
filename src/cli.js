@@ -19,11 +19,11 @@ const humanBytes = bytes => {
 }
 
 const build = async ({ cwd, indent, opts, outputFilepath, verbose }) => {
-	const outputData = await generate({ ...opts, cwd, verbose })
-	const string = JSON.stringify(outputData, undefined, indent ? '\t' : '')
+	const outputIndexData = await generate({ ...opts, cwd, verbose })
+	const string = JSON.stringify(outputIndexData, undefined, indent ? '\t' : '')
 	console.log('Index file size:', humanBytes(new TextEncoder().encode(string).length))
 	await writeFile(outputFilepath, string, 'utf8')
-	return outputData
+	return outputIndexData
 }
 
 const run = async ({ config, cwd, delay, indent, serve, verbose, watch }) => new Promise(
