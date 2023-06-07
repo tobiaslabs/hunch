@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0
+
+### Minor Changes
+
+- 4b40804: Change normalizeMetadata to formatMetadata and add YAML parser options.
+- c48cba7: Add ability to format and ability to save files
+
 ## 0.8.0
 
 ### Minor Changes
