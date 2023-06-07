@@ -42,25 +42,6 @@ const blockNameToParser = {
 	},
 
 	/*
-	Tokenizing JSON for search is tricky, so it's often unsupported, but
-	if you have a lot of it in your content it can make sense to figure
-	out a way to tokenize it. The method in this demo is very rudimentary,
-	but it will result in semi-searchable content.
-	*/
-	json: (block) => {
-		block.content = block
-			.content
-			.replaceAll(':', ' ')
-			.replaceAll('"', ' ')
-			.replaceAll(',', ' ')
-			.replaceAll('{', ' ')
-			.replaceAll('}', ' ')
-			.replaceAll(/\s+/g, ' ')
-			.trim()
-		return block
-	},
-
-	/*
 	For similar reasons, tokenizing a YAML string to be searchable is
 	often not supported but can be desirable. The tokenization method
 	here is similarly very rudimentary, but shows some ways you can
@@ -91,8 +72,7 @@ const blockNameToParser = {
 }
 
 export default {
-	formatBlock: async ({ block }) => {
+	prepareBlock: async (block) => {
 		if (blockNameToParser[block.name]) return blockNameToParser[block.name](block)
-		return block
 	},
 }

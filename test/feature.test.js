@@ -14,8 +14,17 @@ Test a single feature, e.g.:
 
 	node test/feature.test.js facet-matching
 
+Test the configuration of a single feature, e.g. from the $NAME.config.js:
+
+	node test/feature.test.js format-block-content markdown-to-hast
+
+Add the `--verbose` flag at the end for more logs, e.g.:
+
+	node test/feature.test.js format-block-content markdown-to-hast --verbose
+
 */
-const [ , , namedFeature ] = process.argv
+let [ , , namedFeature, namedConfiguration ] = process.argv
+if (namedConfiguration === '--verbose') namedConfiguration = ''
 
 const features = namedFeature
 	? [ namedFeature ]
@@ -34,6 +43,7 @@ const features = namedFeature
 		'prefix',
 		'return-specific-facets',
 		'return-specific-fields',
+		'save-file',
 		'score',
 		'search-specific-fields',
 		'snippet',
@@ -59,11 +69,16 @@ const testTree = {}
 for (const feature of features) {
 	console.log('-', feature)
 	testTree[feature] = {}
-	let configurations = await readdir(`./test/feature/${feature}`)
-	configurations = configurations
-		.filter(c => c.endsWith('.config.js'))
-		.map(c => c.replace(/\.config\.js$/, ''))
-		.sort()
+	let configurations
+	if (namedConfiguration) {
+		configurations = [ namedConfiguration ]
+	} else {
+		configurations = await readdir(`./test/feature/${feature}`)
+		configurations = configurations
+			.filter(c => c.endsWith('.config.js'))
+			.map(c => c.replace(/\.config\.js$/, ''))
+			.sort()
+	}
 	const log = console.log
 	const unsilence = silence()
 	for (const conf of configurations) {
@@ -84,9 +99,9 @@ for (const feature of features) {
 console.log('Validating all assertions...')
 for (const feature in testTree) {
 	for (const conf in testTree[feature]) {
-		test(`${feature}: ${conf}`, () => {
+		test(`${feature}: ${conf}`, async () => {
 			const testList = testTree[feature][conf].runner({ assert, hunch, index: testTree[feature][conf].index })
-			for (const t of testList) t()
+			for (const t of testList) await t()
 		})
 	}
 }
