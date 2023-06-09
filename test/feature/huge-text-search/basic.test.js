@@ -5,7 +5,7 @@ export default ({ assert, hunch, index }) => [
 				q: 'present',
 				pageSize: 1,
 				snippet: {
-					content: 100,
+					'_chunks.content': 100,
 				},
 			}),
 			{
@@ -13,7 +13,7 @@ export default ({ assert, hunch, index }) => [
 					{
 						_id: 'romans/chapter-6.md',
 						_score: 6.103,
-						_chunk: { name: 'markdown', content: 'u should obey it in its lusts.  Also, do not present your members to sin as instruments of unrighteo' },
+						_chunks: [ { name: 'markdown', content: 'u should obey it in its lusts.  Also, do not present your members to sin as instruments of unrighteo' } ],
 					},
 				],
 				page: { offset: 0, size: 1, pages: 69, items: 69 },
@@ -27,7 +27,7 @@ export default ({ assert, hunch, index }) => [
 			q: 'do not present your members',
 			pageSize: 1,
 			snippet: {
-				content: 100,
+				'_chunks.content': 100,
 			},
 		})
 		const duration = Date.now() - start
@@ -38,7 +38,7 @@ export default ({ assert, hunch, index }) => [
 					{
 						_id: 'romans/chapter-6.md',
 						_score: 98.146,
-						_chunk: { name: 'markdown', content: 'hould obey it in its lusts.  Also, do not present your members to sin as instruments of unrighteousn' },
+						_chunks: [ { name: 'markdown', content: 'hould obey it in its lusts.  Also, do not present your members to sin as instruments of unrighteousn' } ],
 					},
 				],
 				page: { offset: 0, size: 1, pages: 775, items: 775 },

@@ -8,16 +8,16 @@ export default ({ assert, hunch, index }) => [
 						_id: 'file1.md',
 						_score: 0.768,
 						title: 'file1',
-						_chunk: { name: 'markdown', content: '\nwords only present in file1\n' },
+						_chunks: [ { name: 'markdown', content: '\nwords only present in file1\n' } ],
 					},
 					{
 						_id: 'file2.md',
 						_score: 0.661,
 						title: 'file2',
-						_chunk: {
+						_chunks: [ {
 							name: 'markdown',
 							content: '\nwords only present in file2 next part shared with file3\n',
-						},
+						} ],
 					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
@@ -34,16 +34,16 @@ export default ({ assert, hunch, index }) => [
 						_id: 'file1.md',
 						_score: 12.281,
 						title: 'file1',
-						_chunk: { name: 'markdown', content: '\nwords only present in file1\n' },
+						_chunks: [ { name: 'markdown', content: '\nwords only present in file1\n' } ],
 					},
 					{
 						_id: 'file2.md',
 						_score: 10.579,
 						title: 'file2',
-						_chunk: {
+						_chunks: [ {
 							name: 'markdown',
 							content: '\nwords only present in file2 next part shared with file3\n',
-						},
+						} ],
 					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 2 },
@@ -60,19 +60,19 @@ export default ({ assert, hunch, index }) => [
 						_id: 'file3.md',
 						_score: 11.171,
 						title: 'file3',
-						_chunk: {
+						_chunks: [ {
 							name: 'markdown',
 							content: '\nthis is file3 next part shared with file2\n',
-						},
+						} ],
 					},
 					{
 						_id: 'file2.md',
 						_score: 10.579,
 						title: 'file2',
-						_chunk: {
+						_chunks: [ {
 							name: 'markdown',
 							content: '\nwords only present in file2 next part shared with file3\n',
-						},
+						} ],
 					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 2 },

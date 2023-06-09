@@ -14,7 +14,7 @@ export default ({ assert, hunch, index }) => [
 						title: 'file2',
 						tags: [ 'dogs' ],
 						podcastId: 123,
-						_chunk: { name: 'markdown', content: '\nwords in file2\n' },
+						_chunks: [ { name: 'markdown', content: '\nwords in file2\n' } ],
 					},
 					{
 						_id: 'file3.md',
@@ -22,7 +22,7 @@ export default ({ assert, hunch, index }) => [
 						title: 'file3',
 						tags: [ 'cats', 'dogs' ],
 						podcastId: 456,
-						_chunk: { name: 'markdown', content: '\nwords in file3\n' },
+						_chunks: [ { name: 'markdown', content: '\nwords in file3\n' } ],
 					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 2 },

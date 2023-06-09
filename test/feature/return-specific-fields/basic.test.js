@@ -11,7 +11,7 @@ export default ({ assert, hunch, index }) => [
 						_score: 0.432,
 						description: 'cool',
 						summary: 'interesting',
-						_chunk: { name: 'markdown', content: '\ncurious\n' },
+						_chunks: [ { name: 'markdown', content: '\ncurious\n' } ],
 					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 1 },
@@ -41,13 +41,13 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'cool',
-				includeFields: [ '_chunk' ],
+				includeFields: [ '_chunks' ],
 			}),
 			{
 				items: [
 					{
 						_id: 'file1.md',
-						_chunk: { name: 'markdown', content: '\ncurious\n' },
+						_chunks: [ { name: 'markdown', content: '\ncurious\n' } ],
 					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 1 },

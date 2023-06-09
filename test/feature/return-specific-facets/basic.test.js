@@ -13,10 +13,10 @@ export default ({ assert, hunch, index }) => [
 						// not the returned items.
 						series: 'Animals',
 						tags: [ 'cats' ],
-						_chunk: {
+						_chunks: [ {
 							name: 'markdown',
 							content: '\nwords in file1\n',
-						},
+						} ],
 					},
 
 				],
@@ -42,10 +42,10 @@ export default ({ assert, hunch, index }) => [
 						title: 'file1',
 						series: 'Animals',
 						tags: [ 'cats' ],
-						_chunk: {
+						_chunks: [ {
 							name: 'markdown',
 							content: '\nwords in file1\n',
-						},
+						} ],
 					},
 
 				],
