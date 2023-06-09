@@ -1,3 +1,14 @@
+// // These properties are necessary for MiniSearch to work, so if you
+// // have actual metadata with the same name we'll store it externally
+// // and recall it later.
+// const MINISEARCH_KEYS_TO_INTERNAL_KEYS = {
+// 	content: '__content',
+// 	id: '__id',
+// 	match: '__match',
+// 	score: '__score',
+// 	terms: '__terms',
+// }
+
 const packTree = (initialKeys, initialValues, rootAllowedKeys) => {
 	const keys = initialKeys || []
 	const values = initialValues || []

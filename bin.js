@@ -1,3 +1,4 @@
 #!/usr/bin/env node
 
-import './dist/cli.js'
+// TODO back to dist
+import './src/cli.js'

@@ -3,7 +3,7 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'which is crooked',
-				snippet: { content: 30 },
+				snippet: { '_chunks.content': 30 },
 			}),
 			{
 				items: [
@@ -11,7 +11,7 @@ export default ({ assert, hunch, index }) => [
 						_id: 'file1.md',
 						_score: 5.752,
 						title: 'Ecclesiastes',
-						_chunk: { name: 'markdown', content: '\nThat which is crooked can’t b' },
+						_chunks: [ { name: 'markdown', content: '\nThat which is crooked can’t b' } ],
 					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 1 },
@@ -23,7 +23,7 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'which is crooked',
-				snippet: { content: 0 },
+				snippet: { '_chunks.content': 0 },
 			}),
 			{
 				items: [
@@ -31,7 +31,7 @@ export default ({ assert, hunch, index }) => [
 						_id: 'file1.md',
 						_score: 5.752,
 						title: 'Ecclesiastes',
-						_chunk: { name: 'markdown', content: '' },
+						_chunks: [ { name: 'markdown', content: '' } ],
 					},
 				],
 				page: { offset: 0, size: 15, pages: 1, items: 1 },
@@ -43,8 +43,8 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'heart',
-				snippet: { content: 15 },
-			}).items[0]._chunk.content,
+				snippet: { '_chunks.content': 15 },
+			}).items[0]._chunks[0].content,
 			' my heart to see',
 			'it has 13 results in the document but finds the "best" match in the document',
 		)
@@ -53,8 +53,8 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'obtained',
-				snippet: { content: 15 },
-			}).items[0]._chunk.content,
+				snippet: { '_chunks.content': 15 },
+			}).items[0]._chunks[0].content,
 			've obtained for ',
 			'it only has 1 result in the document',
 		)
@@ -63,8 +63,8 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'test with',
-				snippet: { content: 25 },
-			}).items[0]._chunk.content,
+				snippet: { '_chunks.content': 25 },
+			}).items[0]._chunks[0].content,
 			'w, I will test you with mi',
 			'a split word does a search',
 		)
@@ -73,7 +73,7 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'flush',
-				snippet: { content: 100 },
+				snippet: { '_chunks.content': 100 },
 			}).items.length,
 			0,
 			'the word "flush" does not exist',
@@ -81,9 +81,9 @@ export default ({ assert, hunch, index }) => [
 		assert.equal(
 			hunch({ index })({
 				q: 'flush',
-				snippet: { content: 30 },
+				snippet: { '_chunks.content': 30 },
 				fuzzy: 0.2,
-			}).items[0]._chunk.content,
+			}).items[0]._chunks[0].content,
 			'o cheer my flesh with wine, my',
 			'but with fuzziness it is found',
 		)

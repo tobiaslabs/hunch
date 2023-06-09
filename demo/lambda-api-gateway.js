@@ -34,8 +34,8 @@ the query parameters and hands them to Hunch directly.
 */
 
 import { readFile } from 'node:fs/promises'
-import { hunch } from '../dist/hunch.js'
-import { fromQuery } from '../dist/from-query.js'
+import { hunch } from '../src/hunch.js'
+import { fromQuery } from '../src/from-query.js'
 
 let search
 

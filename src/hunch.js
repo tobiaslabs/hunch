@@ -151,8 +151,9 @@ const naiveSnip = (string, snippetLength, queryString, fuzzy) => {
 const snipContent = ({ q, snippet: propertiesToSnip, fuzzy }, searchResult) => {
 	if (propertiesToSnip)
 		for (const key in propertiesToSnip)
-			if (key === 'content') searchResult._chunk.content = naiveSnip(searchResult._chunk.content, propertiesToSnip[key], q, fuzzy)
-			else if (typeof searchResult[key] === 'string') searchResult[key] = naiveSnip(searchResult[key], propertiesToSnip[key], q, fuzzy)
+			if (key === '_chunks.content') {
+				for (const chunk of searchResult._chunks) chunk.content = naiveSnip(chunk.content, propertiesToSnip[key], q, fuzzy)
+			} else if (typeof searchResult[key] === 'string') searchResult[key] = naiveSnip(searchResult[key], propertiesToSnip[key], q, fuzzy)
 	return searchResult
 }
 
@@ -260,10 +261,10 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 					...props,
 					...metadata,
 					_id: filesList[chunkIdToFileIndex[id]],
-					_chunk: {
+					_chunks: [ {
 						...(getChunkMetadata(id) || {}),
 						content,
-					},
+					} ],
 				})
 			})
 

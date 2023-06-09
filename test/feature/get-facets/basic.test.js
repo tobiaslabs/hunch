@@ -35,10 +35,10 @@ export default ({ assert, hunch, index }) => [
 						series: 'Animals',
 						tags: [ 'cats', 'dogs' ],
 						published: '2022-12-20',
-						_chunk: {
+						_chunks: [ {
 							name: 'markdown',
 							content: '\nwords in file1\n',
-						},
+						} ],
 					},
 				],
 				page: { items: 4, offset: 0, pages: 4, size: 1 },
