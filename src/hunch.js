@@ -1,6 +1,7 @@
 import MiniSearch from 'minisearch'
 
 import { unpack } from './utils/unpack.js'
+import { snipContent } from './utils/snip-content.js'
 import { getOutputWithPagination } from './utils/pagination.js'
 import { filterForMatchingPhrases } from './utils/filter-for-matching-phrases.js'
 
@@ -84,78 +85,6 @@ const removeFieldsNotIncluded = (items, includedFields) => items.map(item => {
 	for (const field of includedFields) if (item[field] !== undefined) out[field] = item[field]
 	return out
 })
-
-const approximateTextExtraction = (string, cursor, size) => {
-	let out = ''
-	let forwardCursor = cursor + 1
-	let backwardCursor = cursor
-	let breakForward
-	let breakBackward
-	while (out.length < size) {
-		if (string[forwardCursor]) {
-			out += string[forwardCursor]
-			forwardCursor++
-		} else {
-			breakForward = true
-		}
-		if (string[backwardCursor]) {
-			out = string[backwardCursor] + out
-			backwardCursor--
-		} else {
-			breakBackward = true
-		}
-		if (breakForward && breakBackward) break
-	}
-	return out
-}
-
-const naiveSnip = (string, snippetLength, queryString, fuzzy) => {
-	// If no query string is given, we can just snip the very start of the text.
-	if (!queryString) return approximateTextExtraction(string, 0, snippetLength)
-
-	// If a blind lookup finds it, that's the cheapest way, and we'll just
-	// grab the very first result.
-	const stringLower = string.toLowerCase()
-	const queryStringLower = queryString.toLowerCase()
-	let cursor = stringLower.split(queryStringLower)
-	if (cursor.length > 1) cursor = cursor[0].length
-	if (cursor >= 0) return approximateTextExtraction(string, cursor + Math.round(queryString.length / 2), snippetLength)
-
-	// If that doesn't find it, we are dealing with a query that
-	// maybe has spaces or is fuzzy or anything else, so we're going
-	// to try throwing it at MiniSearch in chunks.
-	const paragraphs = string.split('\n')
-	const options = fuzzy >= 0
-		? { fuzzy }
-		: {}
-	const miniSearch = new MiniSearch({ fields: [ 'p' ], ...options })
-	miniSearch.addAll(paragraphs.map((p, id) => ({ p, id })))
-	const match = miniSearch.search(queryString, options)?.[0]
-	if (match) {
-		// At this point we'll try again to find the first query
-		// word in the best-matching, but using the indexed term
-		// in case fuzzing causes a mismatch.
-		const firstQueryWordLower = match.terms[0]
-		const matchingParagraph = paragraphs[match.id]
-		cursor = matchingParagraph.toLowerCase().split(firstQueryWordLower)
-		if (cursor.length > 1) cursor = cursor[0].length
-		return approximateTextExtraction(matchingParagraph, cursor + Math.round(firstQueryWordLower.length / 2), snippetLength)
-	}
-
-	// We couldn't find the query string. This is very peculiar, and I don't
-	// think it should happen, but as an emergency fallback we'll return the
-	// first text snippet.
-	return approximateTextExtraction(string, 0, snippetLength)
-}
-
-const snipContent = ({ q, snippet: propertiesToSnip, fuzzy }, searchResult) => {
-	if (propertiesToSnip)
-		for (const key in propertiesToSnip)
-			if (key === '_chunks.content') {
-				for (const chunk of searchResult._chunks) chunk.content = naiveSnip(chunk.content, propertiesToSnip[key], q, fuzzy)
-			} else if (typeof searchResult[key] === 'string') searchResult[key] = naiveSnip(searchResult[key], propertiesToSnip[key], q, fuzzy)
-	return searchResult
-}
 
 export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSize }) => {
 	if (!prePaginationSort) prePaginationSort = defaultPrePaginationSort
@@ -253,8 +182,7 @@ export const hunch = ({ index: bundledIndex, sort: prePaginationSort, maxPageSiz
 		}
 		searchResults = searchResults
 			.filter(r => chunkIdToKeep[r.id])
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			.map(({ terms: ignore1, match: ignore2, id, score, content, ...props }) => {
+			.map(({ id, score, content, ...props }) => {
 				const metadata = getFileMetadata(chunkIdToFileIndex[id])
 				if (score) metadata._score = Math.round(score * 1000) / 1000
 				return snipContent(query, {
