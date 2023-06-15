@@ -101,6 +101,8 @@ export const fromQuery = params => {
 			parsed.includeFields = castToUniqueStrings(params[key])
 		} else if (parent === 'include' && child === 'facets') {
 			parsed.includeFacets = castToUniqueStrings(params[key])
+		} else if (parent === 'include' && child === 'matches' && params[key] !== 'false') {
+			parsed.includeMatches = true
 		}
 	}
 
