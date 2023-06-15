@@ -113,7 +113,7 @@ const naiveSnip = (string, snippetLength, queryString, wordBoundaryCharacters, f
 	return approximateTextExtraction(string, 0, snippetLength, wordBoundaryCharacters)
 }
 
-export const snipContent = ({ q, snippet: propertiesToSnip, fuzzy, wordBoundaryCharacters }, searchResult) => {
+export const snipContent = ({ q, snippet: propertiesToSnip, fuzzy, includeMatches, wordBoundaryCharacters }, searchResult) => {
 	if (propertiesToSnip)
 		for (const key in propertiesToSnip) {
 			if (key === '_chunks.content') {
@@ -131,6 +131,15 @@ export const snipContent = ({ q, snippet: propertiesToSnip, fuzzy, wordBoundaryC
 				}
 			}
 		}
+	if (includeMatches && Object.keys(searchResult.match || {}).length) {
+		searchResult._matches = {}
+		for (const matchingWord in searchResult.match) {
+			for (const keypath of searchResult.match[matchingWord]) {
+				if (keypath === 'content') searchResult._matches['_chunks.content'] = matchingWord
+				else searchResult._matches[keypath] = matchingWord
+			}
+		}
+	}
 	delete searchResult.terms
 	delete searchResult.match
 	return searchResult

@@ -21,6 +21,7 @@ test('every query parameter all at once', () => {
 			fuzzy: 0.8,
 			includeFacets: [ 'foo', 'bar' ],
 			includeFields: [ 'foo', 'bar' ],
+			includeMatches: true,
 			pageSize: 4,
 			pageOffset: 2,
 			prefix: true,
@@ -40,6 +41,7 @@ test('every query parameter all at once', () => {
 			fuzzy: '0.8',
 			'include[facets]': 'foo,bar',
 			'include[fields]': 'foo,bar',
+			'include[matches]': '',
 			'page[size]': '4',
 			'page[offset]': '2',
 			prefix: 'true',
@@ -70,6 +72,20 @@ test('specific query parameter scenarios', () => {
 				facetMustNotMatch: { tags: [ 'dogs' ] },
 			},
 			{ 'facets[tags]': 'cats,~rabbits,-dogs' },
+		],
+		[
+			'matches as anything truthy',
+			{
+				includeMatches: 3,
+			},
+			{ 'include[matches]': '' },
+		],
+		[
+			'ignored if anything truthy',
+			{
+				includeMatches: 0,
+			},
+			{},
 		],
 		[
 			'facets with multiple values',

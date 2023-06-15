@@ -43,6 +43,21 @@ test('turn query parameters into a hunch query', () => {
 		fromQuery({ 'include[facets]': 'foo,bar' }),
 		{ includeFacets: [ 'foo', 'bar' ] },
 	)
+	assert.equal(
+		fromQuery({ 'include[matches]': '' }),
+		{ includeMatches: true },
+		'if it exists as an empty string',
+	)
+	assert.equal(
+		fromQuery({ 'include[matches]': 'false' }),
+		{},
+		'only not set if exactly false',
+	)
+	assert.equal(
+		fromQuery({ 'include[matches]': 'blargh' }),
+		{ includeMatches: true },
+		'for anything else it is truthy',
+	)
 	assert.throws(
 		() => fromQuery({ 'page[size]': '-3' }),
 		/The parameter "page\[size]" must be an integer greater or equal to zero/,
