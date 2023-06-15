@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.1
+
+### Patch Changes
+
+- 44a22ab: Use the dist, Luke!
+
 ## 0.10.0
 
 ### Minor Changes
