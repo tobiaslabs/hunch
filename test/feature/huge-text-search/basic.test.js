@@ -16,15 +16,15 @@ export default ({ assert, hunch, index }) => [
 						_chunks: [
 							{
 								name: 'markdown',
-								content: 'u should obey it in its lusts.  Also, do not present your members to sin as instruments of unrighteo',
+								content: 'you should obey it in its lusts.  Also, do not present your members to sin as instruments of unrighteou',
 								snippet: {
-									content: { start: 1264, size: 2644 },
+									content: { before: 1162, after: 1379 },
 								},
 							},
 						],
 					},
 				],
-				page: { offset: 0, size: 1, pages: 69, items: 2 },
+				page: { offset: 0, size: 1, pages: 69, items: 69 },
 			},
 			'make sure basic text lookup works',
 		)
@@ -49,9 +49,9 @@ export default ({ assert, hunch, index }) => [
 						_chunks: [
 							{
 								name: 'markdown',
-								content: 'hould obey it in its lusts.  Also, do not present your members to sin as instruments of unrighteousn',
+								content: 'should obey it in its lusts.  Also, do not present your members to sin as instruments of unrighteousnes',
 								snippet: {
-									content: { start: 1267, size: 2644 },
+									content: { before: 1166, after: 1375 },
 								},
 							},
 						],
