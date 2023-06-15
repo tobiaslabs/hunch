@@ -29,21 +29,22 @@ const addFacetMatcher = (parsed, key, facet, value) => {
 
 /**
  * @typedef {Object} QueryParameters
- * @param {string} [q] - The text to search for.
- * @param {string} [id] - The identifier of the document.
- * @param {number} [fuzzy] - The fuzziness of the main query parameter. (Float. Default: none.)
- * @param {boolean} [prefix] - Whether to use the query string as a prefix.
- * @param {boolean} [suggest] - Whether to use the query string to suggest other search queries.
- * @param {Array<string>} [fields] - The fields to search within.
- * @param {Array<{key:string,descending:boolean}>} [sort] - The list of ordered sort parameters passed to the pre-pagination sort function.
- * @param {number} [pageOffset] - The zero-index number of pagination offsets to use in the search. (Integer. Default: none)
- * @param {number} [pageSize] - The number of items per pagination. (Integer. Default: none)
- * @param {Object<string,number>} [boost] - The metadata key to boost by some value greater than 1. (Float. Default: 1)
- * @param {Object<string,Array<string>>} [facetMustMatch] - Constrain the search results to records containing facets with all facet values.
- * @param {Object<string,Array<string>>} [facetMustMatchAny] - Constrain the search results to records containing any of the facet values.
- * @param {Object<string,Array<string>>} [facetMustNotMatch] - Constrain the search results to records that do not contain facets with exact values.
- * @param {Array<string>} [includeFields] - A list of fields to include on each search result. (Default: all fields are returned.)
- * @param {Array<string>} [includeFacets] - A list of facet names to include on the overall search result response. Use `*` for all facets. (Default: only facets found in search results.)
+ * @property {string} [q] - The text to search for.
+ * @property {string} [id] - The identifier of the document.
+ * @property {number} [fuzzy] - The fuzziness of the main query parameter. (Float. Default: none.)
+ * @property {boolean} [prefix] - Whether to use the query string as a prefix.
+ * @property {boolean} [suggest] - Whether to use the query string to suggest other search queries.
+ * @property {Array<string>} [fields] - The fields to search within.
+ * @property {Array<{key:string,descending:boolean}>} [sort] - The list of ordered sort parameters passed to the pre-pagination sort function.
+ * @property {number} [pageOffset] - The zero-index number of pagination offsets to use in the search. (Integer. Default: none)
+ * @property {number} [pageSize] - The number of items per pagination. (Integer. Default: none)
+ * @property {Object<string,number>} [boost] - The metadata key to boost by some value greater than 1. (Float. Default: 1)
+ * @property {Object<string,Array<string>>} [facetMustMatch] - Constrain the search results to records containing facets with all facet values.
+ * @property {Object<string,Array<string>>} [facetMustMatchAny] - Constrain the search results to records containing any of the facet values.
+ * @property {Object<string,Array<string>>} [facetMustNotMatch] - Constrain the search results to records that do not contain facets with exact values.
+ * @property {Array<string>} [includeFields] - A list of fields to include on each search result. (Default: all fields are returned.)
+ * @property {Array<string>} [includeFacets] - A list of facet names to include on the overall search result response. Use `*` for all facets. (Default: only facets found in search results.)
+ * @property {boolean} [includeMatches] - Set to truthy if search results should include match details.
  */
 
 /**
