@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.0
+
+### Minor Changes
+
+- aa94eb5: Add ability to include matching terms on returned results.
+- 4ddc05f: Snippets are now slightly context aware and let you know if there are words before or after the result string.
+- 60c65f4: Always return \_chunks instead of \_chunk
+
 ## 0.9.0
 
 ### Minor Changes
