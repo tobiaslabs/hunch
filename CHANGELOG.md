@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.2
+
+### Patch Changes
+
+- 3fa99b7: Correction to the included matches stuff.
+
 ## 0.10.1
 
 ### Patch Changes
