@@ -10,18 +10,32 @@ export default ({ assert, hunch, index }) => [
 				items: [
 					{
 						_id: 'file1.md',
-						_score: 0.311,
+						_score: 0.372,
 						_chunks: [
 							{
 								name: 'markdown',
-								content: '\nit becomes necessary to kats a search engine\n',
+								content: '\nit becomes necessary to cats a search engine\n',
+								matches: { content: [ 'cats' ] },
 							},
 						],
-						_matches: { '_chunks.content': 'kats', description: 'kats' },
+						_matches: { description: [ 'kats' ] },
+						description: 'when in the kats of human events',
+					},
+					{
+						_id: 'file2.md',
+						_score: 0.372,
+						_chunks: [
+							{
+								name: 'markdown',
+								content: '\nit becomes necessary to cats a search engine\n',
+								matches: { content: [ 'cats' ] },
+							},
+						],
+						_matches: { description: [ 'kats' ] },
 						description: 'when in the kats of human events',
 					},
 				],
-				page: { offset: 0, size: 15, pages: 1, items: 1 },
+				page: { offset: 0, size: 15, pages: 1, items: 2 },
 			},
 			'matched words in content and metadata',
 		)

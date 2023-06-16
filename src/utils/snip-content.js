@@ -132,13 +132,23 @@ export const snipContent = ({ q, snippet: propertiesToSnip, fuzzy, includeMatche
 			}
 		}
 	if (includeMatches && Object.keys(searchResult.match || {}).length) {
-		searchResult._matches = {}
-		for (const matchingWord in searchResult.match) {
+		for (const matchingWord in searchResult.match)
 			for (const keypath of searchResult.match[matchingWord]) {
-				if (keypath === 'content') searchResult._matches['_chunks.content'] = matchingWord
-				else searchResult._matches[keypath] = matchingWord
+				if (keypath === 'content') {
+					for (const chunk of searchResult._chunks) {
+						if (chunk.content?.includes(matchingWord)) {
+							chunk.matches = chunk.matches || {}
+							chunk.matches.content = chunk.matches.content || []
+							chunk.matches.content.push(matchingWord)
+						}
+					}
+					//
+				} else {
+					searchResult._matches = searchResult._matches || {}
+					searchResult._matches[keypath] = searchResult._matches[keypath] || []
+					searchResult._matches[keypath].push(matchingWord)
+				}
 			}
-		}
 	}
 	delete searchResult.terms
 	delete searchResult.match
