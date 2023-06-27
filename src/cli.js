@@ -70,8 +70,10 @@ const run = async ({ config, cwd, delay, indent, serve, verbose, watch }) => new
 
 const cli = sade('hunch', true)
 
+const BUILD_VERSION = '__build_version__'
+
 cli
-	.version('__build_version__')
+	.version(BUILD_VERSION)
 	.describe('Compiled search for your static Markdown files.')
 	.option('-c, --config', 'Path to configuration file.', 'hunch.config.js')
 	.option('--cwd', 'Set the current working directory somewhere else.')
@@ -96,7 +98,13 @@ cli
 				process.exit(0)
 			})
 			.catch(error => {
-				console.error('Unexpected error while running Hunch!', error)
+				console.error(`
+Unexpected error while running HunchJS! Please report the following details to the maintainers at https://github.com/tobiaslabs/hunch or on Discord https://discord.gg/AKUtZf5jjb
+
+version: hunch@${BUILD_VERSION}
+config: ${config}
+cwd: ${cwd}
+`, error)
 				process.exit(1)
 			})
 	})
