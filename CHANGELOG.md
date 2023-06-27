@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.3
+
+### Patch Changes
+
+- e05df13: Update to fatal error logging.
+
 ## 0.10.2
 
 ### Patch Changes
