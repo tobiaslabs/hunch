@@ -37,6 +37,7 @@
     "test:functions": "uvu test test.js -i feature",
     "test:lint": "eslint 'src/**/*.js' 'bin.js' 'rollup.config.js'",
     "test:benchmark": "time node src/cli.js --cwd test/benchmark --config test/benchmark/hunch.config.js",
+    "windows": "node src/cli.js --cwd demo --config demo/hunch.demo-config.js",
     "build": "rollup -c",
     "demo": "cd demo && rm -rf build && node demo.test.js",
     "demo-server": "node src/cli.js --cwd demo --config demo/hunch.demo-config.js --serve 3001 --watch",

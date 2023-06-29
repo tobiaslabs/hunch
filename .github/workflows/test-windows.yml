@@ -25,6 +25,4 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
-    - run: npm run build
-    - run: npm run demo
-    - run: npm run test:benchmark
+    - run: npm run windows
