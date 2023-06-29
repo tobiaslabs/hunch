@@ -21,10 +21,10 @@ chapter: ${chapter}
 for (const bookFileName of bibleBookFileNames) {
 	const bookDir = join(contentDir, bookFileName.replace(/\.json$/, ''))
 	await mkdir(bookDir)
-	const book = JSON.parse(await readFile(join(jsonDir, bookFileName), 'utf8'))
+	const fragments = JSON.parse(await readFile(join(jsonDir, bookFileName), 'utf8'))
 	let currentChapterNumber
 	let chapterCollector
-	for (const { type, chapterNumber, value } of book) {
+	for (const { type, chapterNumber, value } of fragments) {
 		if (chapterNumber && chapterNumber !== currentChapterNumber) {
 			if (currentChapterNumber && chapterCollector) {
 				await writeFile(join(bookDir, `chapter-${currentChapterNumber}.md`), chapterCollector, 'utf8')
@@ -32,8 +32,10 @@ for (const bookFileName of bibleBookFileNames) {
 			currentChapterNumber = chapterNumber
 			chapterCollector = chapterFrontmatter(bookFileName, chapterNumber)
 		}
-		if (type === 'paragraph start' || type === 'paragraph text') {
+		if (type === 'paragraph start' || type === 'paragraph text' || type === 'line text') {
 			chapterCollector += (value || '')
+		} else if (type === 'line break') {
+			chapterCollector += '\n'
 		} else if (type === 'paragraph end') {
 			chapterCollector += '\n\n'
 		}

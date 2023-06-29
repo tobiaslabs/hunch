@@ -12,7 +12,7 @@ export default ({ assert, hunch, index }) => [
 				items: [
 					{
 						_id: 'romans/chapter-6.md',
-						_score: 6.103,
+						_score: 6.164,
 						_chunks: [
 							{
 								name: 'markdown',
@@ -24,7 +24,7 @@ export default ({ assert, hunch, index }) => [
 						],
 					},
 				],
-				page: { offset: 0, size: 1, pages: 69, items: 69 },
+				page: { offset: 0, size: 1, pages: 73, items: 73 },
 			},
 			'make sure basic text lookup works',
 		)
@@ -45,7 +45,7 @@ export default ({ assert, hunch, index }) => [
 				items: [
 					{
 						_id: 'romans/chapter-6.md',
-						_score: 98.146,
+						_score: 90.282,
 						_chunks: [
 							{
 								name: 'markdown',
@@ -57,7 +57,7 @@ export default ({ assert, hunch, index }) => [
 						],
 					},
 				],
-				page: { offset: 0, size: 1, pages: 775, items: 775 },
+				page: { offset: 0, size: 1, pages: 1057, items: 1057 },
 			},
 			'looking for long phrases',
 		)
