@@ -1,3 +1,4 @@
+import { pathToFileURL } from 'node:url'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve, isAbsolute } from 'node:path'
 import CheapWatch from 'cheap-watch'
@@ -27,7 +28,7 @@ const build = async ({ cwd, indent, opts, outputFilepath, verbose }) => {
 }
 
 const run = async ({ config, cwd, delay, indent, serve, verbose, watch }) => new Promise(
-	(resolvePromise, rejectPromise) => import(config)
+	(resolvePromise, rejectPromise) => import(pathToFileURL(config).href)
 		.then(({ default: opts }) => {
 			const port = typeof serve === 'number' ? serve : 9001
 			let { output: outputFilepath } = opts
