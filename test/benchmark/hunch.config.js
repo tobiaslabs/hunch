@@ -25,7 +25,7 @@ for (const key in renderer) {
 
 export default {
 	input: '../feature/huge-text-search/content-basic',
-	output: 'build',
+	output: './build/hunch.json',
 	glob: '**/*.md',
 	facets: [ 'book' ],
 	prepareFilesData: async () => ({ renderer }),
