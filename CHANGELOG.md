@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.0
+
+### Minor Changes
+
+- 8a1cf29: Added official support for MS Windows. Pull requests now run the demo on a Windows machine as a general validation that everything works on that OS. The only bug was resolved by https://github.com/nodejs/node/issues/34765
+
+### Patch Changes
+
+- 8a1cf29: Added initial benchmark for testing purposes and found some inaccuracies in the `huge-text-search` pre-test text generation.
+
 ## 0.10.3
 
 ### Patch Changes
