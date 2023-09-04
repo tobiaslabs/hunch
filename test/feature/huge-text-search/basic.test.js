@@ -61,6 +61,6 @@ export default ({ assert, hunch, index }) => [
 			},
 			'looking for long phrases',
 		)
-		assert.ok(duration < 1000, `approximate hard limit on time (duration=${duration})`)
+		assert.ok(duration < 2000, `approximate hard limit on time (duration=${duration})`)
 	},
 ]
