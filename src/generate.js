@@ -65,7 +65,7 @@ export const generate = async options => {
 	console.log(`Parsed ${files.length} content files.`)
 
 	const site = mergeMetadata && mergeMetadata({ files })
-	if (saveSite) await saveSite({ site })
+	if (saveSite) await saveSite({ site, files })
 	const prepared = prepareFilesData && await prepareFilesData({ files, site })
 
 	console.log(`Processing ${files.length} files.`)
