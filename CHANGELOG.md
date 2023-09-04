@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.0
+
+### Minor Changes
+
+- ac1ff9b: Add "files" to the API of "saveSite".
+
 ## 0.11.0
 
 ### Minor Changes
