@@ -3,6 +3,7 @@ import { setTimeout as timeoutDelay } from 'node:timers'
 
 import { fromQuery } from '../from-query.js'
 import { hunch } from '../hunch.js'
+import { logger } from './logger.js'
 
 const prettify = url => {
 	let [ pre, query ] = url.split('?')
@@ -20,14 +21,14 @@ const HOSTNAME = '127.0.0.1'
 let server
 export const startServer = ({ port, index, delay }) => {
 	if (server) server.close(() => {
-		console.log('HunchJS server restarting due to index changes...')
+		logger.info('HunchJS server restarting due to index changes...')
 		server = undefined
 		setTimeout(() => { startServer({ port, index, delay }) })
 	})
 	else {
 		const search = hunch({ index })
 		server = createServer((req, res) => {
-			console.log(new Date(), req.method, prettify(req.url))
+			logger.info(new Date(), req.method, prettify(req.url))
 			const { searchParams } = new URL(`https://${HOSTNAME}${req.url}`)
 			let body
 			let statusCode = 200
@@ -50,7 +51,7 @@ export const startServer = ({ port, index, delay }) => {
 			}, delay)
 		})
 		server.listen(port, () => {
-			console.log(`HunchJS server running: http://${HOSTNAME}:${port}/`)
+			logger.info(`HunchJS server running: http://${HOSTNAME}:${port}/`)
 		})
 	}
 }

@@ -1,5 +1,8 @@
 {
 	"extends": [
 		"@saibotsivad/eslint-config-saibotsivad"
-	]
+	],
+	"rules": {
+		"no-console": "error"
+	}
 }

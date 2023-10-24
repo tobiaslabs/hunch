@@ -6,6 +6,7 @@ import sade from 'sade'
 
 import { generate } from './generate.js'
 import { startServer } from './utils/server.js'
+import { logger } from './utils/logger.js'
 
 // numbers picked to look approximately nice enough
 const humanTime = millis => {
@@ -21,9 +22,10 @@ const humanBytes = bytes => {
 
 const build = async ({ cwd, indent, opts, outputFilepath, verbose }) => {
 	const outputIndexData = await generate({ ...opts, cwd, verbose })
+	logger.info('Search index generated')
 	const string = JSON.stringify(outputIndexData, undefined, indent ? '\t' : '')
-	console.log('Index file size:', humanBytes(new TextEncoder().encode(string).length))
 	await writeFile(outputFilepath, string, 'utf8')
+	logger.info(`Index written to disk (${humanBytes(new TextEncoder().encode(string).length)})`)
 	return outputIndexData
 }
 
@@ -44,16 +46,17 @@ const run = async ({ config, cwd, delay, indent, serve, verbose, watch }) => new
 							debounce: 80,
 						})
 						const rebuildIndex = () => {
-							console.log('Rebuilding index, one moment...')
+							logger.info('Rebuilding index')
 							build({ cwd, indent, opts, outputFilepath, serve, verbose })
 								.then(index => { if (serve) startServer({ port, index, delay }) })
 								.catch(error => {
-									console.error('Error while building index:', error)
+									logger.error('Error while building index:', error)
 								})
 						}
 						watch.on('+', rebuildIndex)
 						watch.on('-', rebuildIndex)
 						watch.init().then(() => {
+							logger.info('Initial index build in progress')
 							rebuildIndex()
 						})
 					} else {
@@ -95,11 +98,11 @@ cli
 		const start = Date.now()
 		run({ config, cwd, delay: parseInt(delay, 10) || 0, indent, serve, verbose, watch })
 			.then(() => {
-				console.log(`Hunch completed in ${humanTime(Date.now() - start)}.`)
+				logger.info(`Hunch completed (${humanTime(Date.now() - start)})`)
 				process.exit(0)
 			})
 			.catch(error => {
-				console.error(`
+				logger.error(`
 Unexpected error while running HunchJS! Please report the following details to the maintainers at https://github.com/tobiaslabs/hunch or on Discord https://discord.gg/AKUtZf5jjb
 
 version: hunch@${BUILD_VERSION}
