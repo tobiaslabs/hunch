@@ -8,6 +8,7 @@ import { makeChunks } from './utils/make-chunks.js'
 import { pack } from './utils/pack.js'
 import { parseFile } from './utils/parse-file.js'
 import { prepareBlock } from './utils/prepare-block.js'
+import { logger } from './utils/logger.js'
 
 const DEFAULT_OPTIONS = {
 	facets: [],
@@ -17,9 +18,13 @@ const DEFAULT_OPTIONS = {
 	prepareBlock,
 	glob: '**/*.md',
 	indent: null,
-	preFilter: file => !file.endsWith('.DS_Store'),
 	searchableFields: [],
 	storedFields: [],
+
+	// This filter is basically anything that is *excessively* obvious that it will
+	// never be a content file. Consumers should be able to immediately update this
+	// implementation, so it's not a big deal, just want to make sure defaults are sane.
+	preFilter: file => !file.endsWith('.DS_Store'),
 }
 
 export const generate = async options => {
@@ -51,7 +56,7 @@ export const generate = async options => {
 
 	if (!isAbsolute(contentFolder)) contentFolder = resolve(cwd || currentWorkingDirectory(), contentFolder)
 
-	console.log('Parsing all content files...')
+	logger.info('Finding all content files')
 	const files = await glob(globString, { cwd: contentFolder })
 		.then(files => files.filter(preFilter))
 		.then(files => Promise.all(
@@ -60,22 +65,26 @@ export const generate = async options => {
 				.map((file, index) => parseFile({ contentFolder, file, index, formatMetadata, formatBlockMetadata, yamlOptions })),
 		))
 		.then(parsed => parsed.filter(filterFile))
-	if (verbose) for (const { file } of files) console.log('-', file)
+	if (verbose) for (const { file } of files) logger.info('-', file)
 	const filesList = files.map(f => f.file)
-	console.log(`Parsed ${files.length} content files.`)
+	logger.info(`Found and parsed ${files.length} content files`)
 
 	const site = mergeMetadata && mergeMetadata({ files })
 	if (saveSite) await saveSite({ site, files })
 	const prepared = prepareFilesData && await prepareFilesData({ files, site })
 
-	console.log(`Processing ${files.length} files.`)
+	logger.info('Processing all content files')
+	const times = []
 	const processSingleFile = async ({ metadata, file, blocks }) => {
+		const start = Date.now()
 		if (prepareBlock) blocks = await Promise.all(blocks.map(
 			block => prepareBlock(block, { file, metadata, blocks, files, site, prepared })
 				.then(data => ({ ...block, data })),
 		))
 		if (saveFile) await saveFile({ file, metadata, blocks, files, site })
-		return finalizeRecord({ file, metadata, blocks, files, site, prepared })
+		const record = finalizeRecord({ file, metadata, blocks, files, site, prepared })
+		times.push(Date.now() - start)
+		return record
 	}
 
 	const {
@@ -91,6 +100,11 @@ export const generate = async options => {
 		verbose,
 	})
 
+	let sum = 0
+	for (let t of times) sum += t
+	logger.info('Average file process time (milliseconds):', Math.floor(sum / times.length * 1000) / 1000)
+
+
 	const validFacetValue = value => value === undefined
 		|| typeof value === 'string'
 		|| typeof value === 'number'
@@ -102,7 +116,8 @@ export const generate = async options => {
 		for (const file of files)
 			for (const facetKey of facets)
 				if (!validFacetValue(file.metadata[facetKey])) {
-					throw new Error('Faceted values must be primitive strings or numbers, or arrays containing only strings or numbers.')
+					logger.warn('Found invalid facet value. Faceted values must be primitive strings or numbers, or arrays containing only strings or numbers.', { file: file.file, facet: facetKey, value: file.metadata[facetKey] })
+					delete file.metadata[facetKey]
 				}
 
 	_minisearchOptions = _minisearchOptions || {}
@@ -117,12 +132,14 @@ export const generate = async options => {
 	// to make sure all searchable fields are stored.
 	_minisearchOptions.storeFields = _minisearchOptions.storeFields || _minisearchOptions.fields
 	if (verbose) {
-		console.log('MiniSearch searchable fields:')
-		for (const f of _minisearchOptions.fields) console.log('-', f)
+		let lines = 'MiniSearch searchable fields:'
+		for (const f of _minisearchOptions.fields) lines += ('\n- ' + f)
+		logger.info(lines)
 	}
-	console.log('Building search index.')
+	logger.info('Building search index')
 	const miniSearch = new MiniSearch(_minisearchOptions)
 	miniSearch.addAll(chunks)
+	logger.info('Optimizing and packing index')
 
 	return pack({
 		// pass through configs
