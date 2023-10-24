@@ -1,3 +1,5 @@
+import { logger } from './logger.js'
+
 export const makeChunks = ({ files, searchableFields, verbose }) => {
 	const chunkIdToFileIndex = {}
 	const chunkMetadata = {}
@@ -6,7 +8,7 @@ export const makeChunks = ({ files, searchableFields, verbose }) => {
 	const chunks = []
 	let fileIndex = 0
 	for (const { metadata, file, blocks } of files) {
-		if (verbose) console.log('-', file, `(${blocks.length} chunks)`)
+		if (verbose) logger.info('-', file, `(${blocks.length} chunks)`)
 		let fileChunkIndex = 0
 		// MiniSearch requires that searchable fields be duplicated across
 		// chunks. The packing operation can minify it though.
