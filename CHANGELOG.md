@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.13.0
+
+### Minor Changes
+
+- bde422e: Change to logged output for easier debugging and benchmarking, and handle case where faceted values are invalid by dropping them instead of throwing.
+
+### Patch Changes
+
+- fcdd0e1: Handle `null` values more gracefully.
+- 4a83f61: Including fields and facets is now allowed to be empty.
+
 ## 0.12.0
 
 ### Minor Changes
