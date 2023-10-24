@@ -22,9 +22,12 @@ export const toQuery = query => {
 	if (query.pageOffset !== undefined) out['page[offset]'] = query.pageOffset.toString()
 	if (query.prefix) out.prefix = 'true'
 	if (query.suggest) out.suggest = 'true'
-	if (query.fields?.length) out.fields = query.fields.join(',')
-	if (query.includeFields?.length) out['include[fields]'] = query.includeFields.join(',')
-	if (query.includeFacets?.length) out['include[facets]'] = query.includeFacets.join(',')
+	if (query.fields) out.fields = query.fields.join(',')
+
+	// If the `include*` properties are arrays *at all* they should be
+	// respected. If they are empty arrays it means to exclude those.
+	if (Array.isArray(query.includeFields)) out['include[fields]'] = query.includeFields.join(',')
+	if (Array.isArray(query.includeFacets)) out['include[facets]'] = query.includeFacets.join(',')
 	if (query.includeMatches) out['include[matches]'] = ''
 
 	if (Array.isArray(query.sort) && query.sort.length)
