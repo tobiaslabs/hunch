@@ -152,9 +152,19 @@ test('specific query parameter scenarios', () => {
 			{ 'include[fields]': 'foo,bar' },
 		],
 		[
+			'include fields is empty',
+			{ includeFields: [] },
+			{ 'include[fields]': '' },
+		],
+		[
 			'include facets',
 			{ includeFacets: [ 'foo', 'bar' ] },
 			{ 'include[facets]': 'foo,bar' },
+		],
+		[
+			'include facets is empty',
+			{ includeFacets: [] },
+			{ 'include[facets]': '' },
 		],
 	]
 	for (const [ label, query, expected ] of testEveryProperty)
