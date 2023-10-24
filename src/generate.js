@@ -70,8 +70,15 @@ export const generate = async options => {
 	logger.info(`Found and parsed ${files.length} content files`)
 
 	const site = mergeMetadata && mergeMetadata({ files })
-	if (saveSite) await saveSite({ site, files })
-	const prepared = prepareFilesData && await prepareFilesData({ files, site })
+	let prepared
+	if (prepareFilesData) {
+		logger.info('Preparing files data')
+		prepared = await prepareFilesData({ files, site })
+	}
+	if (saveSite) {
+		logger.info('Saving site information')
+		await saveSite({ site, files, prepared })
+	}
 
 	logger.info('Processing all content files')
 	const times = []
