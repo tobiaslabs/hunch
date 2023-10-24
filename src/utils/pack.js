@@ -20,7 +20,7 @@ const packTree = (initialKeys, initialValues, rootAllowedKeys) => {
 			for (const elem of obj) {
 				replace.push(recursiveReplacer(elem))
 			}
-		} else if (typeof obj === 'object') {
+		} else if (typeof obj === 'object' && obj !== null) {
 			replace = {}
 			const objectKeys = restrictedKeys || Object.keys(obj)
 			for (const key of objectKeys)
