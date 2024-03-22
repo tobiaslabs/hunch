@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.1
+
+### Patch Changes
+
+- daf1ccc: Allow output to be false explicitly in more places.
+
 ## 0.14.0
 
 ### Minor Changes
