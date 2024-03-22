@@ -88,10 +88,18 @@ export const generate = async options => {
 			block => prepareBlock(block, { file, metadata, blocks, files, site, prepared })
 				.then(data => ({ ...block, data })),
 		))
-		if (saveFile) await saveFile({ file, metadata, blocks, files, site })
 		const record = finalizeRecord({ file, metadata, blocks, files, site, prepared })
+		if (saveFile) await saveFile({ record, file, metadata, blocks, files, site })
 		times.push(Date.now() - start)
 		return record
+	}
+
+	const processedFiles = (await Promise.all(files.map(file => processSingleFile(file))))
+		.filter(Boolean)
+
+	if (options.output === false) {
+		logger.info('Output set to false, skipping index generation.')
+		return undefined
 	}
 
 	const {
@@ -100,9 +108,7 @@ export const generate = async options => {
 		chunkMetadata,
 		fileToMetadata,
 	} = makeChunks({
-		files: (
-			await Promise.all(files.map(file => processSingleFile(file)))
-		).filter(Boolean),
+		files: processedFiles,
 		searchableFields,
 		verbose,
 	})

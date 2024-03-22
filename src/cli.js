@@ -22,11 +22,13 @@ const humanBytes = bytes => {
 
 const build = async ({ cwd, indent, opts, outputFilepath, verbose }) => {
 	const outputIndexData = await generate({ ...opts, cwd, verbose })
-	logger.info('Search index generated')
-	const string = JSON.stringify(outputIndexData, undefined, indent ? '\t' : '')
-	await writeFile(outputFilepath, string, 'utf8')
-	logger.info(`Index written to disk (${humanBytes(new TextEncoder().encode(string).length)})`)
-	return outputIndexData
+	if (opts.output !== false) {
+		logger.info('Search index generated')
+		const string = JSON.stringify(outputIndexData, undefined, indent ? '\t' : '')
+		await writeFile(outputFilepath, string, 'utf8')
+		logger.info(`Index written to disk (${humanBytes(new TextEncoder().encode(string).length)})`)
+		return outputIndexData
+	}
 }
 
 const run = async ({ config, cwd, delay, indent, serve, verbose, watch }) => new Promise(
@@ -46,23 +48,26 @@ const run = async ({ config, cwd, delay, indent, serve, verbose, watch }) => new
 							debounce: 80,
 						})
 						const rebuildIndex = () => {
-							logger.info('Rebuilding index')
+							logger.info('Rebuilding...')
 							build({ cwd, indent, opts, outputFilepath, serve, verbose })
-								.then(index => { if (serve) startServer({ port, index, delay }) })
+								.then(index => {
+									if (index && serve) startServer({ port, index, delay })
+									else logger.info('Build complete.')
+								})
 								.catch(error => {
-									logger.error('Error while building index:', error)
+									logger.error('Error while building:', error)
 								})
 						}
 						watch.on('+', rebuildIndex)
 						watch.on('-', rebuildIndex)
 						watch.init().then(() => {
-							logger.info('Initial index build in progress')
+							logger.info('Initial build in progress...')
 							rebuildIndex()
 						})
 					} else {
 						build({ cwd, indent, opts, outputFilepath, serve, verbose })
 							.then(index => {
-								if (serve) startServer({ port, index, delay })
+								if (index && serve) startServer({ port, index, delay })
 								else resolvePromise()
 							})
 					}
