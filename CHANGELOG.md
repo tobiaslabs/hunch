@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.0
+
+### Minor Changes
+
+- 4e0527b: Add ability to skip index creation, and pass finalized record as `record` to `saveFile`.
+
 ## 0.13.0
 
 ### Minor Changes
