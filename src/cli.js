@@ -31,14 +31,18 @@ const build = async ({ cwd, indent, opts, outputFilepath, verbose }) => {
 	}
 }
 
+const optionalMkdir = async (filepath) => {
+	if (filepath) return mkdir(dirname(filepath), { recursive: true })
+}
+
 const run = async ({ config, cwd, delay, indent, serve, verbose, watch }) => new Promise(
 	(resolvePromise, rejectPromise) => import(pathToFileURL(config).href)
 		.then(({ default: opts }) => {
 			const port = typeof serve === 'number' ? serve : 9001
 			let { output: outputFilepath } = opts
-			if (!outputFilepath) throw new Error('Must specify an output filepath.')
-			if (!isAbsolute(outputFilepath)) outputFilepath = resolve(cwd, outputFilepath)
-			mkdir(dirname(outputFilepath), { recursive: true })
+			if (!outputFilepath && outputFilepath !== false) throw new Error('Must specify an output filepath.')
+			if (outputFilepath && !isAbsolute(outputFilepath)) outputFilepath = resolve(cwd, outputFilepath)
+			optionalMkdir(outputFilepath)
 				.then(() => {
 					if (watch) {
 						const watch = new CheapWatch({
