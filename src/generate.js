@@ -40,6 +40,7 @@ export const generate = async options => {
 		prepareFilesData,
 		prepareBlock,
 		filterFile,
+		indexingFilter,
 		mergeMetadata,
 		searchableFields,
 		saveSite,
@@ -91,7 +92,8 @@ export const generate = async options => {
 		const record = finalizeRecord({ file, metadata, blocks, files, site, prepared })
 		if (saveFile) await saveFile({ record, file, metadata, blocks, files, site })
 		times.push(Date.now() - start)
-		return record
+		if (!indexingFilter || indexingFilter({ record, file, metadata, blocks, files, site }))
+			return record
 	}
 
 	const processedFiles = (await Promise.all(files.map(file => processSingleFile(file))))
@@ -116,7 +118,6 @@ export const generate = async options => {
 	let sum = 0
 	for (let t of times) sum += t
 	logger.info('Average file process time (milliseconds):', Math.floor(sum / times.length * 1000) / 1000)
-
 
 	const validFacetValue = value => value === undefined
 		|| typeof value === 'string'
