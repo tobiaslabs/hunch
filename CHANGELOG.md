@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.15.0
+
+### Minor Changes
+
+- 677527d: Add indexingFilter to remove from index at very end of pipe.
+
 ## 0.14.1
 
 ### Patch Changes
