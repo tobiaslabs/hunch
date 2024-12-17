@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16.0
+
+### Minor Changes
+
+- b396f69: Failure in metadata normalization will log with filename.
+
 ## 0.15.0
 
 ### Minor Changes
